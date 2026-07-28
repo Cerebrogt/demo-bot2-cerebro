@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Marketplace GT · Panel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="/assets/jm-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    /* 🎨 PALETA EDITABLE — cambia estos 3 colores para adaptar el panel a cualquier marca.
+       --rosa = color principal · --rosa-suave = fondo claro · --rosa-borde = bordes */
+    --rosa:#F4821F; --rosa-suave:#FFF4E6; --rosa-borde:#F6D5AE;
+    --negro:#1a1a1a; --dorado:#C9A227; --gris:#8a8a8f; --fondo:#F7F9FC; --blanco:#fff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:'Poppins',-apple-system,sans-serif; background:var(--fondo); color:var(--negro); min-height:100vh}
+  a{color:var(--rosa); text-decoration:none; font-weight:600}
+
+  /* ===== Login ===== */
+  .login-wrap{display:flex; align-items:center; justify-content:center; min-height:100vh; background:linear-gradient(160deg,#fff 0%, var(--rosa-suave) 100%)}
+  .login-card{background:var(--blanco); border:1px solid var(--rosa-borde); border-radius:20px; padding:42px 38px; width:360px; text-align:center; box-shadow:0 12px 40px rgba(244,130,31,.12)}
+  .login-card img{height:110px; margin-bottom:10px}
+  .login-sub{color:var(--gris); font-size:12.5px; margin-bottom:22px}
+  .login-input{width:100%; padding:12px 14px; border:1.5px solid var(--rosa-borde); border-radius:12px; font-size:14px; font-family:inherit; outline:none; margin-bottom:12px}
+  .login-input:focus{border-color:var(--rosa)}
+  .login-btn{width:100%; padding:12px; background:var(--rosa); color:#fff; border:none; border-radius:12px; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer}
+  .login-btn:hover{filter:brightness(1.06)}
+  .login-err{color:#c0392b; font-size:12.5px; margin-top:10px; display:none}
+  .powered{margin-top:20px; font-size:11.5px; color:#b9b9c0}
+  .powered a{color:#8a8a8f; font-weight:600}
+  .powered a:hover{color:var(--rosa)}
+
+  /* ===== Layout ===== */
+  header{background:var(--blanco); border-bottom:1px solid #eee; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5}
+  .brand{display:flex; align-items:center; gap:12px}
+  .brand img{height:44px}
+  .brand-name{font-weight:700; font-size:18px}
+  .brand-name span{color:var(--rosa)}
+  .brand-tag{font-size:11px; color:var(--dorado); font-weight:600; letter-spacing:.5px}
+  .logout-btn{border:1.5px solid var(--rosa); color:var(--rosa); background:#fff; padding:8px 22px; border-radius:24px; font-weight:600; font-family:inherit; font-size:13px; cursor:pointer}
+  .logout-btn:hover{background:var(--rosa); color:#fff}
+
+  main{max-width:1240px; margin:0 auto; padding:26px 22px 60px}
+
+  .tabs{display:flex; gap:10px; margin-bottom:22px}
+  .tab{display:flex; align-items:center; gap:8px; padding:10px 26px; border-radius:26px; border:1.5px solid var(--rosa-borde); background:#fff; font-weight:600; font-size:14.5px; font-family:inherit; cursor:pointer; color:var(--negro)}
+  .tab.active{background:var(--rosa); border-color:var(--rosa); color:#fff}
+  .tienda-chip{padding:7px 16px; border-radius:20px; border:1.5px solid #e8d8e1; background:#fff; font-weight:600; font-size:12.5px; font-family:inherit; cursor:pointer; color:#6a6a70}
+  .tienda-chip.active{background:var(--negro); border-color:var(--negro); color:#fff}
+
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px}
+  .stat{background:#fff; border:1px solid #f0e3ea; border-radius:16px; padding:22px; text-align:center; box-shadow:0 4px 18px rgba(0,0,0,.03)}
+  .stat b{display:block; font-size:34px; color:var(--rosa); font-weight:700}
+  .stat span{font-size:11.5px; letter-spacing:1.5px; color:var(--gris); font-weight:600}
+  .stat.gold b{color:var(--dorado)}
+
+  .card{background:#fff; border:1px solid #f0e3ea; border-radius:16px; padding:22px; box-shadow:0 4px 18px rgba(0,0,0,.03)}
+  .card-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
+  .card-title{font-weight:700; font-size:17px}
+  .refresh-btn{border:1.5px solid var(--rosa); color:var(--rosa); background:#fff; padding:7px 18px; border-radius:20px; font-weight:600; font-family:inherit; font-size:13px; cursor:pointer}
+  .refresh-btn:hover{background:var(--rosa-suave)}
+
+  /* Toolbar de filtros */
+  .toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px; padding:14px; background:#FFF6EC; border:1px solid var(--rosa-borde); border-radius:14px}
+  .toolbar label{font-size:11.5px; font-weight:600; color:var(--gris); display:block; margin-bottom:3px}
+  .toolbar input{padding:9px 12px; border:1.5px solid var(--rosa-borde); border-radius:10px; font-family:inherit; font-size:13px; outline:none; background:#fff}
+  .toolbar input:focus{border-color:var(--rosa)}
+  .toolbar .grp{display:flex; flex-direction:column}
+  .tb-btn{padding:9px 18px; border-radius:20px; font-weight:600; font-family:inherit; font-size:13px; cursor:pointer; border:1.5px solid var(--rosa); background:#fff; color:var(--rosa); align-self:flex-end}
+  .tb-btn:hover{background:var(--rosa-suave)}
+  .tb-btn.solid{background:var(--rosa); color:#fff}
+  .tb-btn.solid:hover{filter:brightness(1.06)}
+  .tb-btn.gold{border-color:var(--dorado); color:#9a7b14}
+  .tb-btn.gold:hover{background:#FBF3DC}
+  .result-count{font-size:12.5px; color:var(--gris); margin-left:auto; align-self:flex-end; padding-bottom:9px}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px}
+  th{text-align:left; color:var(--gris); font-size:11px; letter-spacing:1.2px; font-weight:600; padding:8px 10px; border-bottom:1.5px solid #f3e6ed}
+  td{padding:12px 10px; border-bottom:1px solid #f7edf3; vertical-align:top}
+  tr:hover td{background:#FFF6EC}
+  .chip{display:inline-block; background:var(--rosa-suave); color:var(--rosa); border-radius:14px; padding:4px 12px; font-weight:600; font-size:12.5px}
+  .chip.linea{background:#FBF3DC; color:#9a7b14}
+  .muted{color:var(--gris); font-size:12px}
+  .abrir{white-space:nowrap}
+
+  /* Conversaciones */
+  .conv-item{display:flex; justify-content:space-between; gap:10px; padding:13px 10px; border-bottom:1px solid #f7edf3; cursor:pointer; border-radius:10px}
+  .conv-item:hover{background:#FFF6EC}
+  .conv-main{min-width:0}
+  .conv-id{font-weight:600; font-size:13.5px}
+  .conv-last{color:var(--gris); font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:560px}
+  .conv-meta{text-align:right; flex-shrink:0}
+  .flag{display:inline-block; border-radius:12px; padding:3px 10px; font-size:11.5px; font-weight:600; margin-left:4px}
+  .flag.pedido{background:#E8F8EE; color:#1e8e4b}
+  .flag.hot{background:#FDEBEA; color:#c0392b}
+  .flag.canal{background:#EDF2FD; color:#3b5bb5}
+  .flag.linea{background:#FBF3DC; color:#9a7b14}
+  .conv-time{color:#b9b9c0; font-size:11px; display:block; margin-top:4px}
+
+  /* Panel v2 */
+  .estado-btn{border:1.5px solid var(--rosa-borde); background:#fff; color:#b03a6b; border-radius:14px; padding:4px 10px; font-family:inherit; font-size:11.5px; font-weight:600; cursor:pointer; white-space:nowrap}
+  .estado-btn:hover{background:var(--rosa-suave)}
+  .estado-btn.done{border-color:#1e8e4b; color:#1e8e4b; background:#E8F8EE}
+  .del-btn{border:none; background:none; cursor:pointer; font-size:14px; opacity:.55}
+  .del-btn:hover{opacity:1}
+  .row-done td{opacity:.55}
+  .dot-nuevo{display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--rosa); margin-right:6px; vertical-align:middle}
+  .hot-razon{color:#c0392b; font-size:12px; font-weight:600; margin:3px 0}
+  .grupo-tienda td{background:#FBF3DC; font-weight:700; font-size:13px; color:#7a6210; border-radius:8px; padding:8px 10px}
+
+  /* ===== Móvil ===== */
+  @media (max-width: 720px){
+    main{padding:14px 10px 40px}
+    header{padding:10px 14px}
+    .brand img{height:34px}
+    .brand-name{font-size:15px}
+    .stats{gap:8px; margin-bottom:14px; grid-template-columns:repeat(2,1fr)}
+    .stat{padding:12px 6px}
+    .stat b{font-size:22px}
+    .stat span{font-size:9.5px; letter-spacing:.8px}
+    .tabs{flex-wrap:wrap; gap:6px}
+    .tab{padding:8px 16px; font-size:13px}
+    .tienda-chip{padding:6px 10px; font-size:11px}
+    .toolbar{padding:10px; gap:8px}
+    .toolbar input{width:100% !important}
+    .toolbar .grp{width:47%}
+    .card{padding:12px}
+    .conv-last{max-width:100%}
+    .conv-item{flex-direction:column; gap:4px}
+    .conv-meta{text-align:left; display:flex; gap:10px; align-items:center}
+    /* Tabla de pedidos → tarjetas */
+    #viewPedidos table thead{display:none}
+    #viewPedidos table, #viewPedidos tbody, #viewPedidos tr, #viewPedidos td{display:block; width:100%}
+    #viewPedidos tr{border:1px solid #f0e3ea; border-radius:12px; margin-bottom:12px; padding:10px; background:#fff}
+    #viewPedidos td{border:none; padding:4px 2px}
+    #viewPedidos td[data-l]::before{content:attr(data-l)": "; font-size:10.5px; color:var(--gris); font-weight:600; letter-spacing:.5px; text-transform:uppercase; display:block}
+  }
+
+  /* Caja de asesora */
+  .asesora-box{display:flex; gap:6px; align-items:center; padding:10px 12px; border-top:1px solid #f0e3ea; background:#fff}
+  .asesora-box input[type=text]{flex:1; padding:10px 12px; border:1.5px solid var(--rosa-borde); border-radius:20px; font-family:inherit; font-size:13.5px; outline:none}
+  .asesora-box input[type=text]:focus{border-color:var(--rosa)}
+  .asx-btn{border:none; background:none; font-size:19px; cursor:pointer; padding:4px}
+  .asx-send{background:var(--rosa); color:#fff; border:none; border-radius:20px; padding:10px 18px; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer}
+  .asx-send:disabled{opacity:.5}
+  .galeria-menu{position:absolute; bottom:38px; left:-10px; background:#fff; border:1px solid var(--rosa-borde); border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,.12); padding:8px; width:250px; max-height:300px; overflow-y:auto; z-index:30}
+  .galeria-item{display:block; width:100%; text-align:left; border:none; background:none; padding:8px 10px; font-family:inherit; font-size:12.5px; cursor:pointer; border-radius:8px}
+  .galeria-item:hover{background:var(--rosa-suave)}
+
+  /* Chat modal */
+  .modal{display:none; position:fixed; inset:0; background:rgba(26,26,26,.45); z-index:20; align-items:center; justify-content:center; padding:20px}
+  .modal.open{display:flex}
+  .chat-card{background:#fff; border-radius:18px; width:min(680px,100%); max-height:86vh; display:flex; flex-direction:column; overflow:hidden}
+  .chat-head{padding:16px 20px; background:var(--rosa); color:#fff; display:flex; justify-content:space-between; align-items:center}
+  .chat-head b{font-size:15px}
+  .chat-close{background:none; border:none; color:#fff; font-size:22px; cursor:pointer; font-family:inherit}
+  .chat-body{padding:18px; overflow-y:auto; background:#FBF7F9}
+  .msg-row{display:flex; margin-bottom:10px}
+  .msg-row.assistant{justify-content:flex-start}
+  .msg-row.user{justify-content:flex-end}
+  .msg{max-width:78%; padding:10px 14px; border-radius:14px; font-size:13.5px; line-height:1.5}
+  .msg.user{background:var(--rosa); color:#fff; border-bottom-right-radius:4px}
+  .msg.assistant{background:#fff; border:1px solid #f0e3ea; border-bottom-left-radius:4px}
+  .msg-label{font-size:10.5px; font-weight:600; opacity:.7; margin-bottom:4px}
+
+  .empty{text-align:center; color:var(--gris); padding:40px 0; font-size:14px}
+  @media(max-width:720px){
+    .stats{grid-template-columns:1fr}
+    .conv-last{max-width:200px}
+    table{font-size:12px}
+    th:nth-child(1),td:nth-child(1){display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- Form oculto: Netlify lo detecta en el deploy y habilita el envío de pedidos por correo -->
+<form name="pedido-bot" netlify netlify-honeypot="bot-field" hidden>
+  <input type="text" name="tienda">
+  <input type="text" name="productos">
+  <input type="text" name="nombre">
+  <input type="text" name="telefono">
+  <input type="text" name="direccion">
+  <input type="text" name="pago">
+  <input type="text" name="canal">
+  <input type="text" name="fecha">
+</form>
+
+<!-- ===== LOGIN ===== -->
+<div class="login-wrap" id="loginScreen">
+  <div class="login-card">
+    <img src="/assets/jm-logo.png" alt="The Marketplace GT" onerror="this.outerHTML='<div style=&quot;font-size:26px;font-weight:700;color:var(--rosa);margin-bottom:10px;&quot;>🛒 THE MARKETPLACE GT</div>'">
+    <div class="login-sub">Panel de administración · Diseños que empoderan 💕</div>
+    <input type="password" class="login-input" id="loginInput" placeholder="Contraseña" autocomplete="current-password">
+    <button class="login-btn" id="loginBtn">Entrar</button>
+    <div class="login-err" id="loginErr">Contraseña incorrecta</div>
+    <div class="powered">Powered by <a href="https://www.cerebro.com.gt" target="_blank">🧠 Cerebro</a></div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" style="display:none">
+  <header>
+    <div class="brand">
+      <img src="/assets/jm-logo.png" alt="JM" onerror="this.style.display='none'">
+      <div>
+        <div class="brand-name">The <span>Marketplace GT</span></div>
+        <div class="brand-tag">💕 PANEL DE ADMINISTRACIÓN</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px">
+      <span class="powered" style="margin:0">Powered by <a href="https://www.cerebro.com.gt" target="_blank">🧠 Cerebro</a></span>
+      <button class="logout-btn" id="logoutBtn">Salir</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button class="tab active" data-tab="pedidos">🛍️ Pedidos</button>
+      <button class="tab" data-tab="conversaciones">💬 Conversaciones</button>
+    </div>
+
+    <!-- Filtro por tienda (marca única: barra oculta — si el bot maneja varias líneas,
+         quita el display:none y agrega un chip por línea con data-tienda="Nombre") -->
+    <div class="tabs" id="tiendaBar" style="gap:8px; flex-wrap:wrap; display:none">
+      <button class="tienda-chip active" data-tienda="__all__">🌐 General</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat" onclick="verConversaciones()" style="cursor:pointer" title="Ver todas las conversaciones"><b id="statConvs">–</b><span>CONVERSACIONES</span></div>
+      <div class="stat" onclick="verPedidos()" style="cursor:pointer" title="Ver los pedidos"><b id="statPedidos">–</b><span>PEDIDOS</span></div>
+      <div class="stat" onclick="verDespachados()" style="cursor:pointer" title="Ver solo los pedidos despachados"><b id="statDespachados" style="color:#1e8e4b">–</b><span>DESPACHADOS 📦</span></div>
+      <div class="stat gold" onclick="verCalientes()" style="cursor:pointer" title="Ver solo los leads calientes"><b id="statHot">–</b><span>CALIENTES 🔥</span></div>
+    </div>
+
+    <!-- Pedidos -->
+    <div class="card" id="viewPedidos">
+      <div class="card-head">
+        <div class="card-title">🛍️ Pedidos recibidos</div>
+        <button class="refresh-btn" onclick="loadAll()">↻ Actualizar</button>
+      </div>
+
+      <div class="toolbar">
+        <div class="grp">
+          <label>Buscar por nombre</label>
+          <input type="text" id="fNombre" placeholder="Ej: María" style="width:180px" oninput="renderPedidos()">
+        </div>
+        <div class="grp">
+          <label>Desde</label>
+          <input type="date" id="fDesde" onchange="renderPedidos()">
+        </div>
+        <div class="grp">
+          <label>Hasta</label>
+          <input type="date" id="fHasta" onchange="renderPedidos()">
+        </div>
+        <button class="tb-btn" onclick="filtroHoy()">📅 Hoy</button>
+        <button class="tb-btn" onclick="limpiarFiltros()">✕ Limpiar</button>
+        <div class="grp">
+          <label>Cantidad a descargar</label>
+          <input type="number" id="pCant" min="1" placeholder="Vacío = todos" style="width:130px">
+        </div>
+        <button class="tb-btn solid" onclick="exportarExcel()">⬇️ Descargar Excel</button>
+        <span class="result-count" id="fCount"></span>
+      </div>
+
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>FECHA</th><th>PEDIDO</th><th>NOMBRE</th><th>TELÉFONO</th><th>DIRECCIÓN</th><th>MONTO</th><th>PAGO</th><th>LÍNEA</th><th>ESTADO</th><th></th></tr></thead>
+        <tbody id="pedidosBody"></tbody>
+      </table>
+      </div>
+      <div class="empty" id="pedidosEmpty" style="display:none">Todavía no hay pedidos — cuando el bot cierre el primero, aparece acá 💕</div>
+    </div>
+
+    <!-- Conversaciones -->
+    <div class="card" id="viewConvs" style="display:none">
+      <div class="card-head">
+        <div class="card-title">💬 Conversaciones</div>
+        <div style="display:flex; gap:8px; align-items:center">
+          <button class="refresh-btn" onclick="loadAll()">↻ Actualizar</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="grp">
+          <label>Buscar (número o texto)</label>
+          <input type="text" id="cBuscar" placeholder="Ej: 5512 o vaqueras" style="width:180px" oninput="renderConvs()">
+        </div>
+        <div class="grp">
+          <label>Desde</label>
+          <input type="date" id="cDesde" onchange="renderConvs()">
+        </div>
+        <div class="grp">
+          <label>Hasta</label>
+          <input type="date" id="cHasta" onchange="renderConvs()">
+        </div>
+        <button class="tb-btn" onclick="convsHoy()">📅 Hoy</button>
+        <button class="tb-btn" onclick="convsLimpiar()">✕ Limpiar</button>
+        <button id="btnHotOnly" class="tb-btn" style="border-color:#c0392b; color:#c0392b" onclick="toggleHot()">🔥 Solo calientes</button>
+        <div class="grp">
+          <label>Cantidad a descargar</label>
+          <input type="number" id="expCant" min="1" placeholder="Vacío = todas" style="width:130px">
+        </div>
+        <button class="tb-btn solid" onclick="exportarConversaciones()">⬇️ Descargar Excel</button>
+        <span class="result-count" id="cCount"></span>
+      </div>
+      <div id="convsBody"></div>
+      <div class="empty" id="convsEmpty" style="display:none">Sin conversaciones todavía</div>
+    </div>
+  </main>
+</div>
+
+<!-- Chat modal -->
+<div class="modal" id="chatModal">
+  <div class="chat-card">
+    <div class="chat-head"><b id="chatTitle">Conversación</b>
+      <div style="display:flex; align-items:center; gap:10px">
+        <button onclick="resetChat()" title="Borra la memoria del bot para este cliente" style="background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.5); color:#fff; border-radius:16px; padding:5px 14px; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer">🔄 Reiniciar</button>
+        <button class="chat-close" onclick="closeChat()">×</button>
+      </div>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div id="botEstadoBar" style="display:none; padding:6px 14px; background:#FFF6E5; border-top:1px solid #f3ddb8; font-size:12px; font-weight:600; color:#9a6b00; text-align:center">
+      ⏸️ Bot en pausa — atendiendo asesora · <a href="#" onclick="togglePausaBot(false);return false;">reactivar bot</a>
+    </div>
+    <div class="asesora-box">
+      <button class="asx-btn" title="Adjuntar imagen o video corto (máx 4MB)" onclick="$('fileAdjunto').click()">📎</button>
+      <input type="file" id="fileAdjunto" accept="image/*,video/mp4" style="display:none" onchange="adjuntarMedia(this)">
+      <div style="position:relative">
+        <button class="asx-btn" title="Enviar catálogos, cuentas o la hoja de personalizados" onclick="toggleGaleria()">🖼️</button>
+        <div id="galeriaMenu" class="galeria-menu" style="display:none"></div>
+      </div>
+      <input type="text" id="asxTexto" placeholder="Escribir como asesora… (pausa el bot 30 min)" onkeydown="if(event.key==='Enter')enviarTexto()">
+      <button class="asx-send" onclick="enviarTexto()">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'vf-panel-pwd';
+// Última visita (para el punto de "nuevo"): se toma la anterior y se actualiza al cargar
+const _prevVisit = parseInt(localStorage.getItem('jm-last-visit')||'0',10);
+window.addEventListener('load', ()=> setTimeout(()=>{ localStorage.setItem('jm-last-visit', String(Date.now())); }, 4000));
+// Auto-refresh: el panel se actualiza solo cada 60 segundos (si hay sesión y no hay chat abierto)
+setInterval(()=>{ try{ if(typeof PWD==='string' && PWD && !document.getElementById('chatModal').classList.contains('open')) loadAll(); }catch(e){} }, 60000);
+let PWD = null;
+let convsCache = [];
+let pedidosCache = [];
+
+// ---- filtros de pedidos ----
+// Fecha local Guatemala (UTC-6) en formato YYYY-MM-DD para comparar con los inputs date
+function gtDateStr(ts){
+  const d = new Date(ts - 6*60*60*1000);
+  return d.toISOString().slice(0,10);
+}
+let currentTienda = '__all__';
+
+let filtroEstado = '__all__';   // '__all__' | 'despachado' | 'pendiente'
+function pedidosFiltrados(){
+  const nombre = ($('fNombre').value||'').trim().toLowerCase();
+  const desde = $('fDesde').value || null;
+  const hasta = $('fHasta').value || null;
+  return pedidosCache.filter(p=>{
+    if(currentTienda !== '__all__' && (p.lineaNombre||'') !== currentTienda) return false;
+    if(filtroEstado === 'despachado' && p.estado !== 'despachado') return false;
+    if(filtroEstado === 'pendiente' && p.estado === 'despachado') return false;
+    if(nombre && !(p.nombre||'').toLowerCase().includes(nombre)) return false;
+    if(desde || hasta){
+      if(!p.ts) return false;
+      const f = gtDateStr(p.ts);
+      if(desde && f < desde) return false;
+      if(hasta && f > hasta) return false;
+    }
+    return true;
+  });
+}
+
+let hotOnly = false;
+function convsFiltradas(){
+  let convs = currentTienda === '__all__' ? convsCache : convsCache.filter(c => (c.linea||'') === currentTienda);
+  if(hotOnly) convs = convs.filter(c => c.isHot);
+  const q = (($('cBuscar')||{}).value||'').trim().toLowerCase();
+  if(q) convs = convs.filter(c => String(c.id).includes(q) || (c.lastMessage||'').toLowerCase().includes(q));
+  const desde = ($('cDesde')||{}).value || null, hasta = ($('cHasta')||{}).value || null;
+  if(desde || hasta){
+    convs = convs.filter(c => {
+      if(!c.lastTs) return false;
+      const f = gtDateStr(c.lastTs);
+      if(desde && f < desde) return false;
+      if(hasta && f > hasta) return false;
+      return true;
+    });
+  }
+  return convs.slice().sort((a,b)=>(b.lastTs||0)-(a.lastTs||0));
+}
+function convsHoy(){ const hoy = gtDateStr(Date.now()); $('cDesde').value = hoy; $('cHasta').value = hoy; renderConvs(); }
+function convsLimpiar(){ $('cBuscar').value=''; $('cDesde').value=''; $('cHasta').value=''; $('expCant').value=''; toggleHot(false); }
+function toggleHot(force){
+  hotOnly = (typeof force === 'boolean') ? force : !hotOnly;
+  const btn = document.getElementById('btnHotOnly');
+  if(btn){ btn.style.background = hotOnly ? '#c0392b' : '#fff'; btn.style.color = hotOnly ? '#fff' : '#c0392b'; }
+  renderConvs();
+}
+// Clic en las tarjetas de stats → navegar a su vista
+function verPedidos(){
+  filtroEstado = '__all__';
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelector('.tab[data-tab="pedidos"]').classList.add('active');
+  $('viewPedidos').style.display = 'block';
+  $('viewConvs').style.display = 'none';
+  renderPedidos();
+}
+function verDespachados(){
+  filtroEstado = 'despachado';
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelector('.tab[data-tab="pedidos"]').classList.add('active');
+  $('viewPedidos').style.display = 'block';
+  $('viewConvs').style.display = 'none';
+  renderPedidos();
+}
+function verConversaciones(){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelector('.tab[data-tab="conversaciones"]').classList.add('active');
+  $('viewPedidos').style.display = 'none';
+  $('viewConvs').style.display = 'block';
+  toggleHot(false);
+}
+// Clic en la tarjeta CALIENTES → ir a conversaciones mostrando solo calientes
+function verCalientes(){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelector('.tab[data-tab="conversaciones"]').classList.add('active');
+  $('viewPedidos').style.display = 'none';
+  $('viewConvs').style.display = 'block';
+  toggleHot(true);
+}
+
+function updateStats(){
+  const convs = convsFiltradas();
+  const peds = pedidosCache.filter(p => currentTienda==='__all__' || (p.lineaNombre||'')===currentTienda);
+  $('statConvs').textContent = convs.length;
+  $('statPedidos').textContent = peds.length;
+  $('statDespachados').textContent = peds.filter(p=>p.estado==='despachado').length;
+  $('statHot').textContent = convs.filter(c=>c.isHot && !c.hotAtendido).length;
+}
+// ===== MONTO DE VENTA (catálogo The Marketplace + promos 2x + Q30 envío único) =====
+const ENVIO_Q = 30;
+const PRECIOS_JM = [
+  { rx: /almohada|foamy|memory/i,               precio: 99,  promo2: 150 },
+  { rx: /coj[ií]n|gel/i,                        precio: 99,  promo2: 150 },
+  { rx: /soporte|magn[eé]tic/i,                 precio: 75,  promo2: 125 },
+  { rx: /masajeador.{0,25}silla/i,              precio: 275 },
+  { rx: /masajeador/i,                          precio: 225 },
+  { rx: /mesa\s+de\s+noche|smart|inteligente/i, precio: 999 },
+  { rx: /cesta|canasta/i,                       precio: 175 },
+  { rx: /mesa/i,                                precio: 199 },
+  { rx: /trapeador|mopa/i,                      precio: 125 },
+  { rx: /cepillo|cabezal/i,                     precio: 155 },
+  { rx: /zapatera|sill[oó]n/i,                  precio: 435 }
+];
+function montoPedido(productoText){
+  const segs = String(productoText||'').split(/\s*(?:\+|,)\s*|\s+y\s+/i).filter(Boolean);
+  let subtotal = 0, reconocido = false;
+  for(const seg of segs){
+    const item = PRECIOS_JM.find(p => p.rx.test(seg));
+    if(!item) continue;
+    reconocido = true;
+    const mQty = seg.match(/(?:^|[^0-9a-zA-Z])(\d{1,2})(?![0-9])/);
+    let qty = mQty ? parseInt(mQty[1],10) : (/\bdos\b/i.test(seg) ? 2 : 1);
+    if(!qty || qty < 1) qty = 1;
+    if(qty === 2 && item.promo2) subtotal += item.promo2;
+    else if(item.promo2 && qty > 2 && qty % 2 === 0) subtotal += (qty/2)*item.promo2;
+    else subtotal += item.precio * qty;
+  }
+  return reconocido ? subtotal + ENVIO_Q : null;
+}
+function fmtQ(n){ return 'Q ' + Number(n).toLocaleString('es-GT'); }
+
+function renderPedidos(){
+  const pb = $('pedidosBody'); pb.innerHTML='';
+  const pedidos = pedidosFiltrados();
+  $('pedidosEmpty').style.display = pedidos.length ? 'none':'block';
+  const filtroActivo = $('fNombre').value || $('fDesde').value || $('fHasta').value || filtroEstado !== '__all__';
+  const tag = filtroEstado === 'despachado' ? ' (📦 despachados)' : filtroEstado === 'pendiente' ? ' (pendientes)' : '';
+  let totalQ = 0;
+  pedidos.forEach(p => { const m = montoPedido(p.productos); if(m != null) totalQ += m; });
+  $('fCount').textContent = (filtroActivo ? `${pedidos.length} de ${pedidosCache.length} pedidos` : `${pedidosCache.length} pedidos`) + tag + (totalQ ? ` · ${fmtQ(totalQ)}` : '');
+  const lastVisit = _prevVisit;
+  // En vista General: agrupar por tienda (cada página del anuncio con su sección)
+  let listaFinal = pedidos;
+  if(currentTienda === '__all__' && pedidos.length){
+    const grupos = {};
+    for(const p of pedidos){ const g = p.lineaNombre || 'General'; (grupos[g] = grupos[g] || []).push(p); }
+    listaFinal = [];
+    for(const g of Object.keys(grupos).sort()){
+      listaFinal.push({ __header: g, __count: grupos[g].length });
+      listaFinal.push(...grupos[g]);   // ya vienen ordenados por fecha desc
+    }
+  }
+  for(const p of listaFinal){
+    if(p.__header){
+      pb.insertAdjacentHTML('beforeend', `<tr class="grupo-tienda"><td colspan="10">🏪 ${escapeHtml(p.__header)} <span class="muted">· ${p.__count} pedido${p.__count===1?'':'s'}</span></td></tr>`);
+      continue;
+    }
+    const tel = (p.telefono && !/^mismo/i.test(p.telefono)) ? p.telefono : 'mismo-whatsapp';
+    const chatLink = p.canal==='whatsapp'
+      ? `https://wa.me/${(p.telefono||'').replace(/\D/g,'') || p.chatId}`
+      : null;
+    const abrirChat = `<a href="#" class="abrir" onclick="openChatFromPedido('${escapeHtml(p.chatId)}','${p.canal}');return false;">Abrir chat →</a>`;
+    const despachado = p.estado === 'despachado';
+    const nuevo = !despachado && p.ts && p.ts > lastVisit ? '<span class="dot-nuevo" title="Nuevo desde tu última visita"></span>' : '';
+    const estadoBtn = despachado
+      ? `<button class="estado-btn done" onclick="marcarEstado('${escapeHtml(p.key)}','pendiente')" title="Clic para volver a pendiente">✓ Despachado</button>`
+      : `<button class="estado-btn" onclick="marcarEstado('${escapeHtml(p.key)}','despachado')" title="Marcar como despachado">📦 Despachar</button>`;
+    pb.insertAdjacentHTML('beforeend', `<tr class="${despachado?'row-done':''}">
+      <td class="muted" data-l="Fecha">${nuevo}${fmtDate(p.ts)}</td>
+      <td data-l="Pedido"><span class="chip">${escapeHtml(p.productos)}</span></td>
+      <td data-l="Nombre"><b>${escapeHtml(p.nombre)}</b></td>
+      <td data-l="Teléfono">${escapeHtml(tel)}</td>
+      <td data-l="Dirección">${escapeHtml(p.direccion)}</td>
+      <td data-l="Monto" style="white-space:nowrap">${(()=>{const m=montoPedido(p.productos);return m!=null?`<b>${fmtQ(m)}</b>`:'<span class="muted">—</span>';})()}</td>
+      <td class="muted" data-l="Pago">${escapeHtml(p.pago||'')}</td>
+      <td data-l="Línea"><span class="chip linea">${escapeHtml(p.lineaNombre||'General')}</span></td>
+      <td data-l="Estado">${estadoBtn}</td>
+      <td data-l="Acciones">${abrirChat}${chatLink?` · <a href="${chatLink}" target="_blank">WhatsApp ↗</a>`:''} · <button class="del-btn" onclick="borrarPedido('${escapeHtml(p.key)}','${escapeHtml((p.nombre||'').replace(/'/g,''))}')" title="Borrar este pedido">🗑️</button></td>
+    </tr>`);
+  }
+}
+
+// ---- acciones administrativas de pedidos ----
+async function marcarEstado(key, estado){
+  try{
+    const r = await fetch('/.netlify/functions/pedido-admin', { method:'POST', headers:{'Content-Type':'application/json','x-admin-password':PWD}, body: JSON.stringify({ action:'estado', key, estado }) });
+    const d = await r.json();
+    if(d.ok){ const p = pedidosCache.find(x=>x.key===key); if(p) p.estado = estado; renderPedidos(); }
+    else alert('No se pudo actualizar: '+(d.error||''));
+  }catch(e){ alert('Error de conexión'); }
+}
+async function borrarPedido(key, nombre){
+  if(!confirm(`¿Borrar el pedido de ${nombre||'esta clienta'}?\n\nSe elimina del panel de forma permanente (útil para pruebas o duplicados). Esta acción no se puede deshacer.`)) return;
+  try{
+    const r = await fetch('/.netlify/functions/pedido-admin', { method:'POST', headers:{'Content-Type':'application/json','x-admin-password':PWD}, body: JSON.stringify({ action:'delete', key }) });
+    const d = await r.json();
+    if(d.ok){ pedidosCache = pedidosCache.filter(x=>x.key!==key); renderPedidos(); updateStats(); }
+    else alert('No se pudo borrar: '+(d.error||''));
+  }catch(e){ alert('Error de conexión'); }
+}
+async function marcarHotAtendido(id){
+  try{
+    const r = await fetch('/.netlify/functions/pedido-admin', { method:'POST', headers:{'Content-Type':'application/json','x-admin-password':PWD}, body: JSON.stringify({ action:'hot-atendido', id }) });
+    const d = await r.json();
+    if(d.ok){ const c = convsCache.find(x=>String(x.id)===String(id)); if(c) c.hotAtendido = d.atendido; renderConvs(); }
+  }catch(e){ alert('Error de conexión'); }
+}
+function filtroHoy(){
+  const hoy = gtDateStr(Date.now());
+  $('fDesde').value = hoy; $('fHasta').value = hoy;
+  renderPedidos();
+}
+function limpiarFiltros(){
+  $('fNombre').value=''; $('fDesde').value=''; $('fHasta').value='';
+  filtroEstado = '__all__';
+  renderPedidos();
+}
+function exportarExcel(){
+  let pedidos = pedidosFiltrados().slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
+  const pCant = parseInt(($('pCant')||{}).value || '0', 10);
+  if(pCant > 0) pedidos = pedidos.slice(0, pCant);
+  if(!pedidos.length){ alert('No hay pedidos con los filtros actuales'); return; }
+  let totalQ = 0, sinMonto = 0;
+  const rows = pedidos.map(p=>{
+    const monto = montoPedido(p.productos);
+    if(monto != null) totalQ += monto; else sinMonto++;
+    return {
+      'Fecha': p.ts ? new Date(p.ts).toLocaleString('es-GT',{timeZone:'America/Guatemala'}) : '',
+      'Pedido': p.productos||'',
+      'Nombre': p.nombre||'',
+      'Teléfono': (p.telefono && !/^mismo/i.test(p.telefono)) ? p.telefono : 'mismo-whatsapp',
+      'Dirección': p.direccion||'',
+      'Monto (Q)': monto != null ? monto : '',
+      'Pago': p.pago||'',
+      'Línea': p.lineaNombre||'General',
+      'Canal': p.canal==='facebook' ? 'Messenger' : 'WhatsApp'
+    };
+  });
+  // Fila de TOTAL (montos con el envío único de Q30 incluido en cada pedido)
+  rows.push({
+    'Fecha':'', 'Pedido':'', 'Nombre':'', 'Teléfono':'',
+    'Dirección': 'TOTAL' + (sinMonto ? ` (${sinMonto} pedido${sinMonto===1?'':'s'} sin monto)` : ''),
+    'Monto (Q)': totalQ, 'Pago':'', 'Línea':'', 'Canal':''
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:18},{wch:42},{wch:22},{wch:15},{wch:45},{wch:10},{wch:14},{wch:26},{wch:11}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Pedidos');
+  const desde = $('fDesde').value, hasta = $('fHasta').value;
+  const sufijo = desde && hasta ? (desde===hasta ? desde : `${desde}_a_${hasta}`) : gtDateStr(Date.now());
+  XLSX.writeFile(wb, `pedidos-marketplace-jm${pCant>0?`-ultimos-${pCant}`:''}-${sufijo}.xlsx`);
+}
+
+function $(id){ return document.getElementById(id); }
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s??''; return d.innerHTML; }
+function fmtDate(ts){
+  if(!ts) return '';
+  return new Date(ts).toLocaleString('es-GT',{timeZone:'America/Guatemala',day:'2-digit',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
+}
+
+// ---- login ----
+async function tryLogin(pwd){
+  const r = await fetch('/.netlify/functions/pedidos-list', { headers:{'x-admin-password':pwd} });
+  if(r.status === 401) return false;
+  if(!r.ok) throw new Error('Error del servidor');
+  return true;
+}
+async function doLogin(){
+  const pwd = $('loginInput').value.trim();
+  if(!pwd) return;
+  try{
+    if(await tryLogin(pwd)){
+      PWD = pwd; sessionStorage.setItem(STORAGE_KEY, pwd);
+      $('loginScreen').style.display='none'; $('app').style.display='block';
+      loadAll();
+    } else { $('loginErr').style.display='block'; }
+  }catch(e){ $('loginErr').textContent='Error de conexión'; $('loginErr').style.display='block'; }
+}
+$('loginBtn').addEventListener('click', doLogin);
+$('loginInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+$('logoutBtn')?.addEventListener('click', ()=>{ sessionStorage.removeItem(STORAGE_KEY); location.reload(); });
+
+// auto-login
+const saved = sessionStorage.getItem(STORAGE_KEY);
+if(saved){ tryLogin(saved).then(ok=>{ if(ok){ PWD=saved; $('loginScreen').style.display='none'; $('app').style.display='block'; loadAll(); } }).catch(()=>{}); }
+
+// ---- tabs ----
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    $('viewPedidos').style.display = t.dataset.tab==='pedidos' ? 'block':'none';
+    $('viewConvs').style.display = t.dataset.tab==='conversaciones' ? 'block':'none';
+  });
+});
+
+// ---- data ----
+async function loadAll(){
+  try{
+    const [pr, cr] = await Promise.all([
+      fetch('/.netlify/functions/pedidos-list', { headers:{'x-admin-password':PWD} }).then(r=>r.json()),
+      fetch('/.netlify/functions/inbox-list', { headers:{'x-admin-password':PWD} }).then(r=>r.json())
+    ]);
+
+    pedidosCache = pr.pedidos || [];
+    convsCache = cr.conversations || [];
+    renderPedidos();
+    renderConvs();
+    updateStats();
+  }catch(e){ console.error(e); }
+}
+
+function renderConvs(){
+  const convs = convsFiltradas();
+  const cb = $('convsBody'); cb.innerHTML='';
+  $('convsEmpty').style.display = convs.length ? 'none':'block';
+  const cc = $('cCount'); if(cc) cc.textContent = `${convs.length} conversación${convs.length===1?'':'es'}`;
+  const lastVisitC = _prevVisit;
+  for(const c of convs){
+    const canal = c.platform==='whatsapp' ? '📱 WhatsApp' : '💬 Messenger';
+    const hotFlag = c.isHot ? (c.hotAtendido
+      ? '<span class="flag" style="background:#eee;color:#888">🔥 Atendido ✓</span>'
+      : '<span class="flag hot">🔥 Caliente</span>') : '';
+    const flags = [
+      c.isPedido?'<span class="flag pedido">🛍️ Pedido</span>':'',
+      hotFlag,
+      c.linea?`<span class="flag linea">${escapeHtml(c.linea)}</span>`:''
+    ].join('');
+    const nuevo = c.lastTs && c.lastTs > lastVisitC ? '<span class="dot-nuevo" title="Actividad nueva desde tu última visita"></span>' : '';
+    const razon = (c.isHot && !c.hotAtendido && c.hotRazon)
+      ? `<div class="hot-razon">🔥 ${escapeHtml(String(c.hotRazon).slice(0,120))}</div>` : '';
+    const waBtn = c.platform==='whatsapp'
+      ? `<a href="https://wa.me/${escapeHtml(c.id)}" target="_blank" onclick="event.stopPropagation()" title="Abrir en WhatsApp" style="font-size:12px">💬 WhatsApp</a>` : '';
+    const atendidoBtn = (c.isHot && !c.hotAtendido)
+      ? `<button class="estado-btn" style="margin-top:4px" onclick="event.stopPropagation();marcarHotAtendido('${escapeHtml(c.id)}')">✓ Atendido</button>` : '';
+    cb.insertAdjacentHTML('beforeend', `<div class="conv-item" onclick="openChat('${escapeHtml(c.id)}','${c.platform}')">
+      <div class="conv-main">
+        <div class="conv-id">${nuevo}${c.platform==='whatsapp'?'+':''}${escapeHtml(c.id)} <span class="flag canal">${canal}</span>${flags}</div>
+        ${razon}
+        <div class="conv-last">${c.lastRole==='user'?'👤':'🤖'} ${escapeHtml(c.lastMessage)}</div>
+      </div>
+      <div class="conv-meta">
+        <span class="muted">${c.messageCount} msjs</span>
+        <span class="conv-time">${fmtDate(c.lastTs)}</span>
+        <div>${waBtn}</div>
+        ${atendidoBtn}
+      </div>
+    </div>`);
+  }
+}
+
+// Chips de tienda
+document.querySelectorAll('.tienda-chip').forEach(ch=>{
+  ch.addEventListener('click', ()=>{
+    document.querySelectorAll('.tienda-chip').forEach(x=>x.classList.remove('active'));
+    ch.classList.add('active');
+    currentTienda = ch.dataset.tienda;
+    renderPedidos();
+    renderConvs();
+    updateStats();
+  });
+});
+
+// ---- export conversaciones a Excel ----
+async function exportarConversaciones(){
+  try{
+    const r = await fetch('/.netlify/functions/export-conversations', { headers:{'x-admin-password':PWD} });
+    if(!r.ok){ alert('No se pudo descargar las conversaciones'); return; }
+    const data = await r.json();
+    let convs = data.conversations || [];
+    if(!convs.length){ alert('No hay conversaciones para exportar'); return; }
+
+    // Respetar los filtros visibles (tienda + solo calientes) y la cantidad elegida
+    const visibles = convsFiltradas();               // ya ordenadas: más recientes primero
+    const cant = parseInt(($('expCant')||{}).value || '0', 10);
+    const elegidas = cant > 0 ? visibles.slice(0, cant) : visibles;
+    const idsElegidos = new Set(elegidas.map(c => String(c.id)));
+    const orden = new Map(elegidas.map((c,i) => [String(c.id), i]));
+    convs = convs.filter(c => idsElegidos.has(String(c.id)))
+                 .sort((a,b) => (orden.get(String(a.id)) ?? 999) - (orden.get(String(b.id)) ?? 999));
+    if(!convs.length){ alert('No hay conversaciones que coincidan con el filtro actual'); return; }
+
+    const fGT = iso => iso ? new Date(iso).toLocaleString('es-GT',{timeZone:'America/Guatemala'}) : '';
+
+    // Hoja 1: Resumen (una fila por conversación)
+    const resumen = convs.map(c=>({
+      'Cliente': (c.platform==='whatsapp'?'+':'') + c.id,
+      'Canal': c.platform==='facebook' ? 'Messenger' : (c.platform==='instagram' ? 'Instagram' : 'WhatsApp'),
+      'Mensajes': c.messageCount,
+      'Del cliente': c.userMessages,
+      'Del bot': c.botMessages,
+      'Primer mensaje': fGT(c.firstMessageAt),
+      'Último mensaje': fGT(c.lastMessageAt),
+      'Último habló': c.lastRole==='user' ? 'Cliente' : 'Bot'
+    }));
+
+    // Hoja 2: Mensajes completos (una fila por mensaje)
+    const mensajes = [];
+    for(const c of convs){
+      for(const m of (c.messages||[])){
+        mensajes.push({
+          'Cliente': (c.platform==='whatsapp'?'+':'') + c.id,
+          'Canal': c.platform==='facebook' ? 'Messenger' : (c.platform==='instagram' ? 'Instagram' : 'WhatsApp'),
+          'Fecha': fGT(m.ts),
+          'Quién': m.role==='user' ? 'Cliente' : 'Bot',
+          'Mensaje': m.content || ''
+        });
+      }
+    }
+
+    const wb = XLSX.utils.book_new();
+    const ws1 = XLSX.utils.json_to_sheet(resumen);
+    ws1['!cols'] = [{wch:20},{wch:11},{wch:9},{wch:11},{wch:9},{wch:18},{wch:18},{wch:12}];
+    XLSX.utils.book_append_sheet(wb, ws1, 'Resumen');
+    const ws2 = XLSX.utils.json_to_sheet(mensajes);
+    ws2['!cols'] = [{wch:20},{wch:11},{wch:18},{wch:14},{wch:90}];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Mensajes');
+    const sufijo = (hotOnly ? '-calientes' : '') + (cant > 0 ? `-ultimas-${cant}` : '');
+    XLSX.writeFile(wb, `conversaciones-marketplace-jm${sufijo}-${gtDateStr(Date.now())}.xlsx`);
+  }catch(e){ console.error(e); alert('Error generando el Excel'); }
+}
+
+// ---- chat ----
+async function openChat(id, platform){
+  currentChat = { id, platform };
+  $('chatModal').classList.add('open');
+  $('chatTitle').textContent = (platform==='whatsapp'?'+':'') + id;
+  $('chatBody').innerHTML = '<div class="empty">Cargando…</div>';
+  const _fs=document.getElementById('fotoStrip'); if(_fs) _fs.remove();
+  try{
+    // Conversación + fotos guardadas de la clienta, en paralelo
+    const [r, rf] = await Promise.all([
+      fetch(`/.netlify/functions/inbox-conversation?id=${encodeURIComponent(id)}&platform=${encodeURIComponent(platform)}`, { headers:{'x-admin-password':PWD} }),
+      fetch(`/.netlify/functions/chat-fotos?id=${encodeURIComponent(id)}&platform=${encodeURIComponent(platform)}`, { headers:{'x-admin-password':PWD} }).catch(()=>null)
+    ]);
+    const data = await r.json();
+    const msgs = data.messages || data.history || [];
+    let clientFotos = [];
+    try{ if(rf && rf.ok){ clientFotos = ((await rf.json()).fotos||[]).filter(f=>f.k||f.mid||f.u); } }catch(e){}
+    // Asignar cada foto guardada a la burbuja 📷 más cercana en el tiempo (±3 min)
+    const asignadas = new Set();
+    const fid = f => f.k || f.mid || f.u || String(f.ts);
+    // Cada burbuja 📷 declara cuántas fotos trajo ("envió 4 fotos") — se le asignan
+    // EXACTAMENTE esas, las más antiguas disponibles de su ventana de tiempo, en orden.
+    // Así el segundo lote no se lo traga la primera burbuja.
+    const fotosDe = (m)=>{
+      if(!m.ts || typeof m.content!=='string' || !m.content.includes('📷')) return [];
+      const mm = m.content.match(/envió (\d+) foto/);
+      const n = mm ? parseInt(mm[1],10) : 1;
+      // Ventana ASIMÉTRICA: las fotos se registran segundos ANTES de su burbuja
+      // (hasta ~2 min en álbumes grandes). Una burbuja solo reclama fotos creadas
+      // justo antes de ella — jamás fotos del futuro (que pertenecen a burbujas nuevas).
+      const candidatas = clientFotos
+        .filter(f=> !asignadas.has(fid(f)) && f.ts && f.ts >= m.ts - 120*1000 && f.ts <= m.ts + 10*1000)
+        .sort((a,b)=>(a.ts||0)-(b.ts||0));
+      const mias = candidatas.slice(0, n);
+      mias.forEach(f=>asignadas.add(fid(f)));
+      return mias;
+    };
+    $('chatBody').innerHTML = msgs.map(m=>{
+      let content = typeof m.content==='string' ? m.content : '';
+      // 📎 Medios que el bot envió: [IMGS:url1|url2][PDF:url] → mostrarlos de verdad
+      let mediaHtml = '';
+      content = content.replace(/\[IMGS:([^\]]+)\]/g, (_,urls)=>{
+        mediaHtml += '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px">' +
+          urls.split('|').filter(u=>/^https?:\/\//.test(u)).map(u=>
+            `<a href="${u}" target="_blank" rel="noopener"><img src="${u}" style="height:90px; border-radius:8px; border:1px solid #eee" loading="lazy"></a>`
+          ).join('') + '</div>';
+        return '';
+      });
+      content = content.replace(/\[FKEYS:([^\]]+)\]/g, (_,ks)=>{
+        mediaHtml += '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px">' +
+          ks.split('|').filter(k=>/^(wa|fb)\//.test(k)).map(k=>
+            `<img data-fkey="${k}" style="height:110px; border-radius:8px; border:1px solid #eee; cursor:pointer; background:#fff" title="Diseño del pedido">`
+          ).join('') + '</div>';
+        return '';
+      });
+      content = content.replace(/\[PDF:([^\]]+)\]/g, (_,u)=>{
+        if(/^https?:\/\//.test(u)) mediaHtml += `<div style="margin-top:6px"><a href="${u}" target="_blank" rel="noopener" style="font-size:12.5px">📄 Ver catálogo enviado</a></div>`;
+        return '';
+      });
+      // 📷 Fotos reales de la clienta dentro de su burbuja
+      if(m.role==='user'){
+        const mias = fotosDe(m);
+        if(mias.length){
+          mediaHtml += '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px">' +
+            mias.map(f=>`<img data-fkey="${f.k||''}" data-mid="${f.mid||''}" data-u="${f.u||''}" style="height:110px; border-radius:8px; border:1px solid rgba(255,255,255,.5); cursor:pointer; background:#fff" title="Foto enviada por la clienta">`).join('') + '</div>';
+        }
+      }
+      const esAsesora = m.role==='assistant' && content.trim().startsWith('(👩 Asesora');
+      if(esAsesora) content = content.replace(/^\(👩 Asesora\)\s*/, '').replace(/^\(👩 Asesora ([^)]*)\)\s*/, '👩 $1 ');
+      return `
+      <div class="msg-row ${m.role}">
+        <div class="msg ${m.role}" ${esAsesora?'style="border:1.5px solid #C9A227; background:#FFFBEF"':''}>
+          <div class="msg-label">${m.role==='user'?'👤 Cliente':esAsesora?'👩 Asesora':'🤖 Bot'}</div>
+          ${escapeHtml(content.trim()).replace(/\n/g,'<br>')}${mediaHtml}
+        </div>
+      </div>`;
+    }).join('') || '<div class="empty">Sin mensajes</div>';
+    $('chatBody').scrollTop = $('chatBody').scrollHeight;
+    // Estado de pausa del bot + habilitar caja solo en WhatsApp
+    const esWA = platform === 'whatsapp';
+    document.querySelector('.asesora-box').style.display = esWA ? 'flex' : 'none';
+    if(esWA){
+      const cc = convsCache.find(x=>String(x.id)===String(id));
+      setPausaUI(!!(cc && cc.botPausado));
+      panelSend({ action:'estado' }).then(d=>setPausaUI(!!d.pausado)).catch(()=>{});
+    } else setPausaUI(false);
+    // Cargar las imágenes de la clienta con cadena de respaldos: url directa → blob → Meta
+    const fotoIndex = new Map(clientFotos.map(f=>[String(f.k||''), f]));
+    document.querySelectorAll('#chatBody img[data-fkey], #chatBody img[data-mid], #chatBody img[data-u]').forEach(async img=>{
+      try{
+        const entry = fotoIndex.get(img.dataset.fkey||'') || {};
+        const u = img.dataset.u || entry.u;
+        const mid = img.dataset.mid || entry.mid;
+        const key = img.dataset.fkey;
+        const setSrc = (url)=>{ img.src = url; img.onclick = ()=> window.open(url, '_blank'); };
+        if(u){ setSrc(u); return; }
+        if(key){
+          const ir = await fetch(`/.netlify/functions/chat-fotos?key=${encodeURIComponent(key)}`, { headers:{'x-admin-password':PWD} });
+          if(ir.ok){ setSrc(URL.createObjectURL(await ir.blob())); return; }
+        }
+        if(mid){
+          const ir = await fetch(`/.netlify/functions/chat-fotos?mid=${encodeURIComponent(mid)}`, { headers:{'x-admin-password':PWD} });
+          if(ir.ok){ setSrc(URL.createObjectURL(await ir.blob())); return; }
+        }
+        img.style.display = 'none';   // sin fuente disponible (foto vieja ya expirada)
+      }catch(e){ img.style.display = 'none'; }
+    });
+    // Tira superior: solo las fotos que no se pudieron ubicar en una burbuja
+    loadChatFotos(clientFotos.filter(f=>!asignadas.has(fid(f))));
+  }catch(e){ $('chatBody').innerHTML = '<div class="empty">Error cargando conversación</div>'; }
+}
+
+// 📸 Tira de fotos de la clienta que no se pudieron ubicar en una burbuja específica
+async function loadChatFotos(lista){
+  try{
+    const fotos = (lista||[]).slice().reverse(); // más recientes primero
+    if(!fotos.length) return;
+    const prev = document.getElementById('fotoStrip');
+    if(prev) prev.remove();
+    const strip = document.createElement('div');
+    strip.id = 'fotoStrip';
+    strip.style.cssText = 'padding:10px 12px; background:#fff3f8; border-bottom:1px solid #f3cede; display:flex; gap:8px; overflow-x:auto; align-items:center';
+    strip.innerHTML = `<span style="font-size:12px; font-weight:700; color:#b03a6b; white-space:nowrap">📸 Fotos de la clienta (${fotos.length})</span>`;
+    $('chatBody').parentNode.insertBefore(strip, $('chatBody'));
+    for(const f of fotos){
+      try{
+        let url = null;
+        if(f.u){ url = f.u; }
+        else if(f.k){
+          const ir = await fetch(`/.netlify/functions/chat-fotos?key=${encodeURIComponent(f.k)}`, { headers:{'x-admin-password':PWD} });
+          if(ir.ok) url = URL.createObjectURL(await ir.blob());
+        }
+        if(!url && f.mid){
+          const ir = await fetch(`/.netlify/functions/chat-fotos?mid=${encodeURIComponent(f.mid)}`, { headers:{'x-admin-password':PWD} });
+          if(ir.ok) url = URL.createObjectURL(await ir.blob());
+        }
+        if(!url) continue;
+        const img = document.createElement('img');
+        img.src = url;
+        img.title = f.ts ? new Date(f.ts).toLocaleString('es-GT') : '';
+        img.style.cssText = 'height:64px; border-radius:8px; cursor:pointer; border:1px solid #f3cede; flex:0 0 auto';
+        img.onclick = ()=> window.open(url, '_blank');
+        strip.appendChild(img);
+      }catch(e){}
+    }
+  }catch(e){}
+}
+function openChatFromPedido(chatId, canal){
+  if(canal==='whatsapp') openChat(chatId, 'whatsapp');
+  else openChat(chatId.replace(/^fb:/,''), 'facebook');
+}
+function closeChat(){ $('chatModal').classList.remove('open'); const fs=document.getElementById('fotoStrip'); if(fs) fs.remove(); }
+
+// ============ INTERVENCIÓN DE ASESORA ============
+const GALERIA = [
+  // 🖼️ GALERÍA DEL SITIO — medios que la asesora puede enviar con un clic desde el chat.
+  // Solo URLs alojadas en ESTE sitio de Netlify (panel-send lo valida).
+  { nombre: '🪵 Mesa Portátil (laptop)',   url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa/mesa-madera-laptop.jpg', kind: 'image', caption: 'Mesa Portátil Ajustable — Q199 + Q30 de envío 🧡' },
+  { nombre: '🪵 Mesa Portátil (colores)',  url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa/mesa-colores.jpg', kind: 'image', caption: 'Disponible en rosado, beige, blanco y negro' },
+  { nombre: '🪵 Mesa Portátil (real)',     url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa/mesa-real-angulo.jpg', kind: 'image', caption: 'Foto real de la Mesa Portátil' },
+  { nombre: '😴 Almohada Foamy',           url: 'https://luminous-zuccutto-8f822b.netlify.app/img/almohada/almohada-1.jpg', kind: 'image', caption: 'Almohada memory foam — Q99 · 2 por Q150' },
+  { nombre: '🪑 Cojín de Gel',             url: 'https://luminous-zuccutto-8f822b.netlify.app/img/cojin-gel/cojin-gel-1.jpg', kind: 'image', caption: 'Cojín de Gel ortopédico — Q99 · 2 por Q150' },
+  { nombre: '💆 Masajeador de Manos',      url: 'https://luminous-zuccutto-8f822b.netlify.app/img/masajeador-manos/masajeador-manos-1.jpg', kind: 'image', caption: 'Masajeador de Manos recargable — Q225 + Q30 de envío' },
+  { nombre: '🧺 Mesa con Cesta',           url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa-cesta/mesa-cesta-1.jpg', kind: 'image', caption: 'Mesa con Cesta — Q175 + Q30 de envío (blanco o negro)' },
+  { nombre: '📱 Soporte Magnético',        url: 'https://luminous-zuccutto-8f822b.netlify.app/img/soporte/soporte-1.jpg', kind: 'image', caption: 'Soporte Magnético — Q75 · 2 por Q125' },
+  { nombre: '🧹 Trapeador Giratorio',      url: 'https://luminous-zuccutto-8f822b.netlify.app/img/trapeador/trapeador-1.jpg', kind: 'image', caption: 'Trapeador Giratorio — Q125 + Q30 de envío' },
+  { nombre: '🧽 Cepillo Eléctrico',        url: 'https://luminous-zuccutto-8f822b.netlify.app/img/cepillo/cepillo-1.jpg', kind: 'image', caption: 'Cepillo Eléctrico 9 en 1 — Q155 + Q30 de envío' },
+  { nombre: '👞 Zapatera Sillón',          url: 'https://luminous-zuccutto-8f822b.netlify.app/img/zapatera/zapatera-1.jpg', kind: 'image', caption: 'Zapatera Sillón de madera — Q435 + Q30 de envío' },
+  { nombre: '🛏️ Mesa de Noche Smart',      url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa-noche/mesa-noche-1.jpg', kind: 'image', caption: 'Mesa de Noche Inteligente — Q999 + Q30 de envío' },
+];
+
+function burbujaAsesoraLocal(texto){
+  $('chatBody').insertAdjacentHTML('beforeend', `<div class="msg-row assistant"><div class="msg assistant" style="border:1.5px solid #C9A227; background:#FFFBEF"><div class="msg-label">👩 Asesora</div>${escapeHtml(texto)}</div></div>`);
+  $('chatBody').scrollTop = $('chatBody').scrollHeight;
+}
+function setPausaUI(pausado){ $('botEstadoBar').style.display = pausado ? 'block' : 'none'; }
+
+async function panelSend(payload){
+  const r = await fetch('/.netlify/functions/panel-send', { method:'POST', headers:{'Content-Type':'application/json','x-admin-password':PWD}, body: JSON.stringify({ ...payload, id: currentChat.id, platform: currentChat.platform }) });
+  const d = await r.json();
+  if(!d.ok) throw new Error(d.error || 'Error');
+  return d;
+}
+
+async function enviarTexto(){
+  const inp = $('asxTexto');
+  const texto = inp.value.trim();
+  if(!texto || !currentChat.id) return;
+  try{
+    inp.disabled = true;
+    await panelSend({ action:'text', text: texto });
+    inp.value = '';
+    burbujaAsesoraLocal(texto);
+    setPausaUI(true);
+  }catch(e){ alert('No se pudo enviar: ' + e.message); }
+  finally{ inp.disabled = false; inp.focus(); }
+}
+
+async function adjuntarMedia(input){
+  const file = input.files && input.files[0];
+  input.value = '';
+  if(!file || !currentChat.id) return;
+  if(file.size > 4 * 1024 * 1024){ alert('Máximo 4 MB por esta vía. Para videos grandes, usá la galería 🖼️ (se suben al sitio una vez).'); return; }
+  const caption = prompt('Texto para acompañar (opcional):') || '';
+  try{
+    const b64 = await new Promise((res, rej)=>{
+      const fr = new FileReader();
+      fr.onload = ()=> res(String(fr.result).split(',')[1]);
+      fr.onerror = rej;
+      fr.readAsDataURL(file);
+    });
+    await panelSend({ action:'media', dataB64: b64, mime: file.type, caption });
+    burbujaAsesoraLocal(`(${file.type.startsWith('video')?'🎥 video':'📷 imagen'} enviad${file.type.startsWith('video')?'o':'a'}${caption?': '+caption:''})`);
+    setPausaUI(true);
+  }catch(e){ alert('No se pudo enviar: ' + e.message); }
+}
+
+function toggleGaleria(){
+  const g = $('galeriaMenu');
+  if(g.style.display === 'none'){
+    g.innerHTML = GALERIA.map((it,i)=>`<button class="galeria-item" onclick="enviarGaleria(${i})">${it.nombre}</button>`).join('');
+    g.style.display = 'block';
+  } else g.style.display = 'none';
+}
+async function enviarGaleria(i){
+  $('galeriaMenu').style.display = 'none';
+  const it = GALERIA[i];
+  if(!it || !currentChat.id) return;
+  try{
+    await panelSend({ action:'gallery', url: it.url, kind: it.kind, filename: it.filename || '' });
+    burbujaAsesoraLocal(`(enviado: ${it.nombre})`);
+    setPausaUI(true);
+  }catch(e){ alert('No se pudo enviar: ' + e.message); }
+}
+
+async function togglePausaBot(pausar){
+  try{
+    await panelSend({ action:'bot', estado: pausar ? 'pausa' : 'activo' });
+    setPausaUI(pausar);
+  }catch(e){ alert('No se pudo: ' + e.message); }
+}
+
+// Reiniciar conversación (borra la memoria del bot para este cliente)
+let currentChat = { id: null, platform: null };
+async function resetChat(){
+  if(!currentChat.id) return;
+  if(!confirm(`¿Reiniciar la conversación con ${currentChat.id}?\n\nEl bot olvidará todo el historial y lo atenderá como cliente nuevo (el saludo de bienvenida vuelve a salir). Esta acción no se puede deshacer.`)) return;
+  try{
+    const r = await fetch('/.netlify/functions/reset-conversation', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-password':PWD},
+      body: JSON.stringify({ id: currentChat.id, platform: currentChat.platform })
+    });
+    const data = await r.json();
+    if(data.ok){ alert('Conversación reiniciada ✓ El bot atenderá a este cliente desde cero.'); closeChat(); loadAll(); }
+    else alert('No se pudo reiniciar: ' + (data.error||''));
+  }catch(e){ alert('Error de conexión'); }
+}
+$('chatModal').addEventListener('click', e=>{ if(e.target===$('chatModal')) closeChat(); });
+
+// auto-refresh cada 60s
+setInterval(()=>{ if(PWD) loadAll(); }, 60000);
+</script>
+</body>
+</html>

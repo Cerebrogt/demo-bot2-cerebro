@@ -1,0 +1,10 @@
+{
+  "name": "marketplace-gt",
+  "version": "1.0.0",
+  "description": "The Marketplace Guatemala — sitio + bot de pedidos por WhatsApp",
+  "private": true,
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0",
+    "@upstash/redis": "^1.34.0"
+  }
+}

@@ -1,0 +1,28 @@
+# Netlify configuration — The Marketplace GT (sitio + bot WhatsApp + Panel v2)
+
+[build]
+  # Solo se publica public/ — el código de netlify/functions NO queda expuesto
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[functions."whatsapp-webhook"]
+  # Meta espera respuesta en <20s
+  timeout = 15
+
+[functions."admin-producto-chat"]
+  # El asistente de producto llama a Claude — darle margen
+  timeout = 20
+
+[functions."panel-send"]
+  # Intervención de asesora: sube fotos/videos de hasta 4MB a WhatsApp
+  timeout = 26
+
+[functions."order-followup"]
+  # Cada 15 min (8am-8pm GT): UN recordatorio suave a clientes que dejaron
+  # el pedido a medias hace 30 min - 4 h. Flag followup:{phone} = una sola vez.
+  # Si la tasa de respuesta es ~0%, comentar este bloque (lección Cerebro).
+  schedule = "*/15 * * * *"
+  timeout = 60
