@@ -45,7 +45,7 @@ const PRODUCT_NAMES = {
 };
 // Info de cierre (precio por juego + pregunta concreta, no genérica)
 const FOLLOWUP_INFO = {
-  'llantas-vinmax': { linea: 'desde Q1,080 el juego de 4 según la medida', cierre: '¿Qué medida usa tu carro? (está en el costado de la llanta, ej. 195/65R15)' }
+  'llantas-vinmax': { linea: 'desde Q1,080 el juego de 4 según la medida', cierre: '¿Qué medida usa su carro? (está en el costado de la llanta, ej. 195/65R15)' }
 };
 // Precios por juego → producto (mantener en sync con la tabla MEDIDAS del webhook)
 const PRICE_MAP = { '1080': 'llantas-vinmax', '1160': 'llantas-vinmax', '1200': 'llantas-vinmax', '1960': 'llantas-vinmax' };
@@ -82,9 +82,9 @@ function guatemalaHour() {
 function buildFollowupMessage(productKey) {
   if (productKey && FOLLOWUP_INFO[productKey]) {
     const info = FOLLOWUP_INFO[productKey];
-    return `Hola de nuevo 🛞 Quedé pendiente con ${PRODUCT_NAMES[productKey]}: sigue disponible ${info.linea} (plan NeoCuotas). ${info.cierre}`;
+    return `¡Buen día! Le saludamos de Llantas Total 🛞 Quedamos pendientes con ${PRODUCT_NAMES[productKey]}: sigue disponible ${info.linea} (plan NeoCuotas). ${info.cierre}`;
   }
-  return `Hola de nuevo 🛞 ¿Sigues interesado en tus llantas? Con gusto te aparto el juego. ¿Qué medida usa tu carro?`;
+  return `¡Buen día! Le saludamos de Llantas Total 🛞 ¿Sigue interesado en sus llantas? Con gusto le apartamos el juego. ¿Qué medida usa su carro?`;
 }
 
 async function sendWhatsAppMessage(to, text) {
