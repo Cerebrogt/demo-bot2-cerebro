@@ -1,4 +1,4 @@
-// The Marketplace GT — Order Follow-up: recupera clientes que dejaron el pedido a medias
+// Llantas Total — Order Follow-up: recupera clientes que dejaron el pedido a medias
 //
 // Corre cada 15 minutos vía Netlify Scheduled Functions (ver netlify.toml).
 // Solo opera 8am-8pm hora Guatemala (no molestar de noche).
@@ -41,33 +41,14 @@ const NEGATIVE_KEYWORDS = [
 // si no existe el flag interes:{tel}, y SOLO sobre mensajes del CLIENTE, nunca
 // del bot: el saludo del bot lista el catálogo completo y contaminaba la detección).
 const PRODUCT_NAMES = {
-  'trapeador': 'el trapeador giratorio',
-  'zapatera': 'la zapatera sillón de madera',
-  'mesa-cesta': 'la mesa con cesta',
-  'soporte': 'el soporte magnético para teléfono',
-  'mesa-noche': 'la mesa de noche inteligente',
-  'cojin-gel': 'el cojín de gel',
-  'almohada': 'la almohada memory foam',
-  'masajeador-manos': 'el masajeador de manos',
-  'mesa-portatil': 'la mesa portátil',
-  'cepillo': 'el cepillo eléctrico 9 en 1'
+  'llantas-vinmax': 'el juego de llantas VINMAX ECOTOUR HP3'
 };
-// Info de cierre por producto (precio total + pregunta concreta, no genérica)
+// Info de cierre (precio por juego + pregunta concreta, no genérica)
 const FOLLOWUP_INFO = {
-  'trapeador':       { linea: 'Q125 + Q30 de envío', cierre: '¿Qué color prefieres: morado, celeste o verde?' },
-  'zapatera':        { linea: 'Q435 + Q30 de envío', cierre: '¿Te la aparto?' },
-  'mesa-cesta':      { linea: 'Q175 + Q30 de envío', cierre: '¿La quieres en blanco o en negro?' },
-  'soporte':         { linea: 'Q75 (o 2 por Q125) + Q30 de envío', cierre: '¿Te aparto 1 o aprovechas los 2 por Q125?' },
-  'mesa-portatil':   { linea: 'Q199 + Q30 de envío', cierre: '¿Qué color te gustaba: rosado, beige, blanco o negro?' },
-  'almohada':        { linea: 'Q99 (o 2 por Q150) + Q30 de envío', cierre: '¿Te aparto 1 o aprovechas las 2 por Q150?' },
-  'cojin-gel':       { linea: 'Q99 (o 2 por Q150) + Q30 de envío', cierre: '¿Te aparto 1 o aprovechas los 2 por Q150?' },
-  'masajeador-manos':{ linea: 'Q225 + Q30 de envío', cierre: 'Solo me das tu nombre y dirección y queda apartado. ¿Lo hacemos?' },
-  'mesa-noche':      { linea: 'Q999 + Q30 de envío', cierre: 'Si quieres, te conecto con el equipo para resolverte cualquier duda. ¿Te interesa?' },
-  'cepillo':         { linea: 'Q155 + Q30 de envío', cierre: '¿Te lo aparto?' }
+  'llantas-vinmax': { linea: 'desde Q1,080 el juego de 4 según la medida', cierre: '¿Qué medida usa tu carro? (está en el costado de la llanta, ej. 195/65R15)' }
 };
-// Precios → producto (mantener en sync con el catálogo del webhook)
-// OJO: Q155 quedó AMBIGUO (trapeador con envío = cepillo base) — se quitó del mapa.
-const PRICE_MAP = { '199':'mesa-portatil','229':'mesa-portatil','175':'mesa-cesta','205':'mesa-cesta','999':'mesa-noche','1029':'mesa-noche','225':'masajeador-manos','255':'masajeador-manos','75':'soporte','105':'soporte','125':'trapeador','185':'cepillo','435':'zapatera','465':'zapatera' };
+// Precios por juego → producto (mantener en sync con la tabla MEDIDAS del webhook)
+const PRICE_MAP = { '1080': 'llantas-vinmax', '1160': 'llantas-vinmax', '1200': 'llantas-vinmax', '1960': 'llantas-vinmax' };
 function detectProduct(t) {
   t = (t || '').toLowerCase();
   const precio = t.match(/q\s*\.?\s*([\d,]{2,5})/);
@@ -75,18 +56,7 @@ function detectProduct(t) {
     const v = PRICE_MAP[String(parseInt(precio[1].replace(/,/g, ''), 10))];
     if (v) return v;
   }
-  if (/mesa\s+de\s+noche|noche\s+inteligente|\bsmart\b|bur[oó]|carga\s+inal[aá]mbrica|altavoz|bluetooth/.test(t)) return 'mesa-noche';
-  if (/\bcoj[ií]n(es)?\b|\bgel\b|ortop[eé]dic[oa]/.test(t)) return 'cojin-gel';
-  if (/\balmohadas?\b|foamy|memory\s*foam/.test(t)) return 'almohada';
-  if (/sin\s+(la\s+)?(cestas?|canastas?)|mesa\s+(normal|sencilla|simple)/.test(t)) return 'mesa-portatil';
-  if (/\bcestas?\b|\bcanastas?\b|mesa.{0,12}cesta/.test(t)) return 'mesa-cesta';
-  if (/cepillo|\bcabezal(es)?\b|9\s*en\s*1/.test(t)) return 'cepillo';
-  if (/trapeador|\bmopas?\b|\bcubeta\b|exprim/.test(t)) return 'trapeador';
-  if (/zapatera|\bsill[oó]n\b|zapatos/.test(t)) return 'zapatera';
-  if (/\bsoporte\b|magn[eé]tic|porta\s*(celular|tel[eé]fono)/.test(t)) return 'soporte';
-  if (/masajead\w*.{0,25}\b(sillas?|asiento)\b/.test(t)) return null; // ya no se vende
-  if (/masajead\w*/.test(t)) return 'masajeador-manos';
-  if (/mesa\s+port[aá]til|\bport[aá]til\b|escritorio/.test(t)) return 'mesa-portatil';
+  if (/llantas?\b|neum[a\u00e1]tic|vinmax|ecotour|\bhp\s*3\b|\b\d{3}\s*\/\s*\d{2}\s*r?\s*\d{2}\b|\brin(es)?\s*\d{2}\b/.test(t)) return 'llantas-vinmax';
   return null;
 }
 
@@ -112,9 +82,9 @@ function guatemalaHour() {
 function buildFollowupMessage(productKey) {
   if (productKey && FOLLOWUP_INFO[productKey]) {
     const info = FOLLOWUP_INFO[productKey];
-    return `Hola de nuevo 🧡 Quedé pendiente con ${PRODUCT_NAMES[productKey]}: sigue disponible en ${info.linea}, y pagas hasta recibirlo — cero riesgo. ${info.cierre}`;
+    return `Hola de nuevo 🛞 Quedé pendiente con ${PRODUCT_NAMES[productKey]}: sigue disponible ${info.linea} (plan NeoCuotas). ${info.cierre}`;
   }
-  return `Hola de nuevo 🧡 ¿Sigues interesado? Pagas al recibir tu producto — cero riesgo. ¿Te lo aparto?`;
+  return `Hola de nuevo 🛞 ¿Sigues interesado en tus llantas? Con gusto te aparto el juego. ¿Qué medida usa tu carro?`;
 }
 
 async function sendWhatsAppMessage(to, text) {

@@ -63,7 +63,7 @@ exports.handler = async (event) => {
       if (parts.length === 2) {
         return {
           platform: 'facebook', id: rest, pageId: parts[0],
-          linea: 'The Marketplace GT'
+          linea: 'Llantas Total'
         };
       }
       return { platform: 'facebook', id: rest, pageId: null, linea: null };
@@ -71,7 +71,7 @@ exports.handler = async (event) => {
     if (withoutConv.startsWith('ig:')) {
       return { platform: 'instagram', id: withoutConv.replace(/^ig:/, ''), pageId: null, linea: null };
     }
-    return { platform: 'whatsapp', id: withoutConv, pageId: null, linea: 'The Marketplace GT' };
+    return { platform: 'whatsapp', id: withoutConv, pageId: null, linea: 'Llantas Total' };
   }
 
   try {

@@ -1,4 +1,4 @@
-// The Marketplace GT — API admin: conversaciones del bot
+// Llantas Total — API admin: conversaciones del bot
 // GET                → lista resumida (teléfono, mensajes, último mensaje, flags)
 // GET ?tel=502...    → historial completo de una conversación
 // GET ?export=1      → descarga TODAS las conversaciones como JSON
@@ -83,7 +83,7 @@ exports.handler = async (event) => {
         statusCode: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Content-Disposition': `attachment; filename="conversaciones-marketplace-${new Date().toISOString().slice(0, 10)}.json"`
+          'Content-Disposition': `attachment; filename="conversaciones-llantas-total-${new Date().toISOString().slice(0, 10)}.json"`
         },
         body: JSON.stringify(exportData, null, 2)
       };
