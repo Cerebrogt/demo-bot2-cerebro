@@ -905,6 +905,22 @@ exports.handler = async (event) => {
       } catch (e) { /* noop */ }
     }
     if (!interesKey) {
+      // Contexto conversacional: si nadie nombró el producto en ESTE mensaje ni hay flag
+      // guardado (ej. tras un "Reiniciar" del panel), buscarlo en los mensajes recientes
+      // del hilo — del más nuevo al más viejo. Cubre "quiero ver la imagen" cuando el
+      // producto ya se venía hablando.
+      for (let i = history.length - 1; i >= 0 && i >= history.length - 8; i--) {
+        const k = detectProduct(history[i]?.content || '');
+        if (k) { interesKey = k; break; }
+      }
+      if (interesKey) {
+        try {
+          const redis = getRedis();
+          if (redis) await redis.set(`interes:${userId}`, interesKey, { ex: 60 * 60 * 24 * 7 });
+        } catch (e) { /* noop */ }
+      }
+    }
+    if (!interesKey) {
       const weak = detectProductWeak(userText) || (referralText ? detectProductWeak(referralText) : null);
       if (weak) {
         interesKey = weak;
@@ -1020,7 +1036,7 @@ exports.handler = async (event) => {
     }
     if (photoPending) {
       stateNotes = (stateNotes ? stateNotes + '\n' : '') +
-        `- El cliente pidió fotos pero no sé de QUÉ producto. Preguntale de cuál (en cuanto lo diga, el sistema las envía automáticamente).`;
+        `- El cliente pidió fotos pero NO se enviaron porque no sé de QUÉ producto. PROHIBIDO decir \"ahí te van\", \"ya te las mandé\" o similar. Preguntale de cuál producto quiere fotos (en cuanto lo nombre, el sistema las envía automáticamente).`;
     }
 
     // 🚨 RECLAMO POSTVENTA → humano de inmediato (análisis 27-jul: un cliente con
