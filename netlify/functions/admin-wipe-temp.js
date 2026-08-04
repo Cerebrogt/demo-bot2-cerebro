@@ -1,11 +1,11 @@
 // TEMPORAL — borra TODOS los datos de Redis de este bot (conversaciones, pedidos, flags).
 // Se usa una sola vez al reciclar el demo para otro cliente y luego SE ELIMINA este archivo.
-// Uso: GET /.netlify/functions/admin-wipe-temp?pw=ADMIN_PASSWORD&confirm=BORRAR-TODO
+// Uso: GET /.netlify/functions/admin-wipe-temp?clave=ADMIN_PASSWORD&confirm=BORRAR-TODO
 
 const { Redis } = require('@upstash/redis');
 
 exports.handler = async (event) => {
-  const pw = event.queryStringParameters?.pw;
+  const pw = event.queryStringParameters?.clave;
   const confirm = event.queryStringParameters?.confirm;
   const expected = process.env.ADMIN_PASSWORD;
   if (!expected || pw !== expected) return { statusCode: 401, body: 'Unauthorized' };
