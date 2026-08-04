@@ -47,7 +47,7 @@ exports.handler = async (event) => {
         pago: 'contra entrega (+Q30 envío)',
         canal: 'whatsapp',
         linea: 'jm',
-        tiendaNombre: 'Llantas Total',
+        tiendaNombre: 'The Marketplace GT',
         ts
       }), { ex: 60 * 60 * 24 * 90 });
       migrados++;

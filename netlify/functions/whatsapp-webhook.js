@@ -1,14 +1,14 @@
-// LLANTAS TOTAL (demo) — WhatsApp Webhook — llanta VINMAX ECOTOUR HP3 en 6 medidas
+// The Marketplace GT — WhatsApp Webhook v2.0 — MODO CATÁLOGO (5 productos)
 // Arquitectura probada del bot Cerebro AI v4.1: idempotencia por ID de mensaje,
 // flags atómicos SET NX, saludo determinístico, estado inyectado, escape de loops,
 // guardia anti-pedido-perdido, comportamiento humano (typing, pausas, mensajes divididos).
 //
-// Demo Llantas Total (28-jul-2026): VINMAX ECOTOUR HP3, precios POR JUEGO DE 4
-// (plan NeoCuotas): 185/65R14 Q1,080 · 185/65R15 Q1,160 · 195/60R15 Q1,200 ·
-// 195/65R15 Q1,200 · 205/55R16 Q1,200 · 225/65R17 Q1,960.
-// Sucursales zona 8, Ciudad de Guatemala · PBX 2503-1515.
-// El bot detecta la medida de interés (mensaje, anuncio de Meta o botón del sitio),
-// manda la foto del producto y cierra: medida → nombre → teléfono → dirección.
+// v2.0: catálogo de 5 productos (fichas de los docx del 14-jul-2026):
+//   MESA01 Mesa Portátil Q199 · ALMF02 Almohada Foamy Q99 (2xQ150) ·
+//   MAS-MANO03 Masajeador de Manos Q225 · MAS-SILLA03 Masajeador de Silla Q275 ·
+//   MESA-SMART04 Mesa de Noche Inteligente Q999. Envío Q30 · contra entrega · 2-3 días.
+// El bot detecta el producto de interés (mensaje, anuncio de Meta o botón del sitio),
+// manda las fotos del producto correcto y cierra: producto → nombre → teléfono → dirección.
 //
 // Variables de entorno: ANTHROPIC_API_KEY, WHATSAPP_VERIFY_TOKEN, WHATSAPP_ACCESS_TOKEN,
 // WHATSAPP_PHONE_NUMBER_ID, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN,
@@ -41,25 +41,97 @@ const GRAPH_URL = 'https://graph.facebook.com/v20.0';
 // CATÁLOGO (fuente de verdad — fichas de producto 14-jul-2026)
 // ============================================================
 const CATALOG = {
-  'llantas-vinmax': {
-    nombre: 'Llantas VINMAX ECOTOUR HP3',
-    precio: 'desde Q1,080 el juego',
-    lineaPrecio: 'desde Q1,080 el JUEGO de 4 llantas, según la medida',
-    resumen: 'llanta VINMAX ECOTOUR HP3 — precios por JUEGO DE 4 llantas (plan NeoCuotas)',
-    detalle: 'Medidas disponibles y precio por juego de 4: 185/65R14 Q1,080 · 185/65R15 Q1,160 · 195/60R15 Q1,200 · 195/65R15 Q1,200 · 205/55R16 Q1,200 · 225/65R17 Q1,960. La medida aparece en el costado de la llanta actual (ej. 195/65R15).',
-    preguntaCierre: '¿Qué medida usa su carro? (la encuentra en el costado de la llanta, ej. 195/65R15)',
-    fotos: ['llantas/vinmax-ecotour-hp3.jpg', 'llantas/tabla-precios.jpg']
+  'mesa-portatil': {
+    nombre: 'Mesa Portátil Ajustable',
+    precio: 'Q199',
+    lineaPrecio: 'Q199 + Q30 de envío = Q229 total',
+    resumen: 'metal y plywood, 60×40 cm, altura ajustable de 70 cm a 1.10 m',
+    detalle: 'Colores: rosado, beige (tono madera clara), blanco y negro. CON RODOS (ruedas) para moverla fácil. Ideal para laptop, escritorio, desayunos en cama, mesa auxiliar — plegable y liviana.',
+    preguntaCierre: '¿Qué color te gusta: rosado, beige, blanco o negro?',
+    fotos: ['mesa/mesa-madera-laptop.jpg', 'mesa/mesa-lifestyle-cama.jpg', 'mesa/mesa-colores.jpg'],
+    fotosReales: ['mesa/mesa-beige.jpg', 'mesa/mesa-real-angulo.jpg', 'mesa/mesa-vistas.jpg']
+  },
+  'almohada': {
+    nombre: 'Almohada Foamy (memory foam)',
+    precio: 'Q99',
+    lineaPrecio: 'Q99 la unidad o 2 por Q150 + Q30 de envío',
+    resumen: 'memory foam de alta densidad, funda blanca incluida, 30×43 cm y 8 cm de alto',
+    detalle: 'Mejora la postura de cuello y espalda al dormir. La funda se puede lavar a mano o en lavadora. Apta también para niños desde 1 año.',
+    preguntaCierre: '¿Quieres 1 o aprovechas las 2 por Q150?',
+    fotos: ['almohada/almohada-1.jpg', 'almohada/almohada-2.jpg', 'almohada/almohada-3.jpg']
+  },
+  'masajeador-manos': {
+    nombre: 'Masajeador de Manos',
+    precio: 'Q225',
+    lineaPrecio: 'Q225 + Q30 de envío = Q255 total',
+    resumen: 'recargable sin cables, con calefacción integrada, simula la presión de manos reales',
+    detalle: 'Para cuello, hombros, brazos y piernas.',
+    preguntaCierre: '¿Te lo aparto?',
+    fotos: ['masajeador-manos/masajeador-manos-1.jpg', 'masajeador-manos/masajeador-manos-2.jpg']
+  },
+  'cojin-gel': {
+    nombre: 'Cojín de Gel',
+    precio: 'Q99',
+    lineaPrecio: 'Q99 la unidad o 2 por Q150 + Q30 de envío',
+    resumen: 'gel de alivio de presión mejorado, ortopédico y ergonómico, con funda lavable (a mano o en lavadora), 35×30 cm y 4 cm de grosor',
+    detalle: 'Ideal para conductores y silla de oficina.',
+    preguntaCierre: '¿Quieres 1 o aprovechas los 2 por Q150?',
+    fotos: ['cojin-gel/cojin-gel-1.jpg', 'cojin-gel/cojin-gel-2.jpg', 'cojin-gel/cojin-gel-3.jpg']
+  },
+  'mesa-cesta': {
+    nombre: 'Mesa con Cesta',
+    precio: 'Q175',
+    lineaPrecio: 'Q175 + Q30 de envío = Q205 total',
+    resumen: 'metal y madera, 75 cm de alto × 42 cm de ancho, con 2 cestas de almacenamiento incorporadas y rodos para moverla fácil',
+    detalle: 'Colores: blanco y negro. Ideal para frutas y verduras, libros, artículos de limpieza u oficina. NO confundir con la mesa portátil ni con la mesa de noche — esta es la de almacenamiento con cestas.',
+    preguntaCierre: '¿La quieres en blanco o en negro?',
+    fotos: ['mesa-cesta/mesa-cesta-1.jpg', 'mesa-cesta/mesa-cesta-2.jpg', 'mesa-cesta/mesa-cesta-3.jpg']
+  },
+  'soporte': {
+    nombre: 'Soporte Magnético para Teléfono',
+    precio: 'Q75',
+    lineaPrecio: 'Q75 la unidad o 2 por Q125 + Q30 de envío',
+    resumen: 'soporte magnético de agarre fuerte, plegable y ajustable',
+    detalle: 'Se adapta a cualquier modelo de teléfono.',
+    preguntaCierre: '¿Quieres 1 o aprovechas los 2 por Q125?',
+    fotos: ['soporte/soporte-1.jpg', 'soporte/soporte-2.jpg']
+  },
+  'trapeador': {
+    nombre: 'Trapeador Giratorio',
+    precio: 'Q125',
+    lineaPrecio: 'Q125 + Q30 de envío = Q155 total',
+    resumen: 'cubeta con sistema de exprimido giratorio, trapeador de metal y cesta exprimidora de metal',
+    detalle: 'Colores: morado, celeste y verde. Deja los pisos más limpios con menos esfuerzo. Incluye 2 mopas de repuesto.',
+    preguntaCierre: '¿Qué color prefieres: morado, celeste o verde?',
+    fotos: ['trapeador/trapeador-1.jpg', 'trapeador/trapeador-2.jpg']
+  },
+  'zapatera': {
+    nombre: 'Zapatera Sillón de Madera',
+    precio: 'Q435',
+    lineaPrecio: 'Q435 + Q30 de envío = Q465 total',
+    resumen: 'madera resistente con asiento acolchado de cuerina, 80×30×50 cm, para 11 a 14 pares de zapatos',
+    detalle: 'Multifuncional: zapatera y sillón en uno, diseño elegante. Se entrega desarmada, fácil de armar — incluye video instructivo para el armado (ese video va con el producto, no se envía por chat).',
+    preguntaCierre: '¿Te la aparto?',
+    fotos: ['zapatera/zapatera-1.jpg', 'zapatera/zapatera-2.jpg', 'zapatera/zapatera-3.jpg']
+  },
+  'mesa-noche': {
+    nombre: 'Mesa de Noche Inteligente',
+    precio: 'Q999',
+    lineaPrecio: 'Q999 + Q30 de envío = Q1,029 total',
+    resumen: 'madera maciza y vidrio templado, 55×45×55 cm',
+    detalle: 'Color: negro (único disponible). Carga inalámbrica para tus dispositivos, altavoces Bluetooth integrados, luz LED táctil y diseño extensible. Va desarmada con todo lo necesario — instalación súper fácil.',
+    preguntaCierre: '¿Te la aparto?',
+    fotos: ['mesa-noche/mesa-noche-1.jpg', 'mesa-noche/mesa-noche-2.jpg']
+  },
+  'cepillo': {
+    nombre: 'Cepillo Eléctrico',
+    precio: 'Q155',
+    lineaPrecio: 'Q155 + Q30 de envío = Q185 total',
+    resumen: 'cepillo giratorio 9 en 1: recargable, impermeable y portátil, con 9 cabezales y mango extensible hasta 1.66 m con ajuste de seguridad',
+    detalle: 'Limpia y pule sin esfuerzo: esquinas de piso y azulejos, baños, electrodomésticos, ventanas, paredes y hasta el carro. NO vendemos repuestos de cabezales, pero fácilmente se pueden hacer en casa.',
+    preguntaCierre: '¿Te lo aparto?',
+    fotos: ['cepillo/cepillo-1.jpg', 'cepillo/cepillo-2.jpg', 'cepillo/cepillo-3.jpg']
   }
-};
-
-// Tabla de medidas (fuente de verdad para precios por juego de 4)
-const MEDIDAS = {
-  '185/65R14': 1080,
-  '185/65R15': 1160,
-  '195/60R15': 1200,
-  '195/65R15': 1200,
-  '205/55R16': 1200,
-  '225/65R17': 1960
 };
 
 // Detección de producto en DOS NIVELES para no confundir fotos:
@@ -68,16 +140,20 @@ const MEDIDAS = {
 // Así, si venían hablando de la mesa de noche y dice "fotos de la mesa", NO se cambia a la portátil.
 function detectProduct(text) {
   const t = (text || '').toLowerCase();
-  if (/llantas?\b|neum[a\u00e1]tic|vinmax|ecotour|\bhp\s*3\b|\b\d{3}\s*\/\s*\d{2}\s*r?\s*\d{2}\b|\brin(es)?\s*\d{2}\b|\baro\s*\d{2}\b|juego de 4/.test(t)) return 'llantas-vinmax';
-  return null;
-}
-
-// Detecta la MEDIDA exacta mencionada (ej. "195/65R15", "195 65 15") — se inyecta al ESTADO
-function detectMedida(text) {
-  const m = (text || '').match(/(\d{3})\s*[\/\s-]\s*(\d{2})\s*r?\s*[\/\s-]?\s*(\d{2})/i);
-  if (!m) return null;
-  const key = `${m[1]}/${m[2]}R${m[3]}`;
-  return MEDIDAS[key] !== undefined ? key : null;
+  if (/mesa\s+de\s+noche|noche\s+inteligente|\bsmart\b|bur[oó]|carga\s+inal[aá]mbrica|altavoz|bluetooth/.test(t)) return 'mesa-noche';
+  if (/\bcoj[ií]n(es)?\b|\bgel\b|ortop[eé]dic[oa]|asiento\s+de\s+gel/.test(t)) return 'cojin-gel';
+  if (/\balmohadas?\b|foamy|memory\s*foam/.test(t)) return 'almohada';
+  // NEGACIÓN primero: "la mesa SIN cesta" = la portátil (la palabra "cesta" aparece, pero negada)
+  if (/sin\s+(la\s+)?(cestas?|canastas?)|mesa\s+(normal|sencilla|simple)/.test(t)) return 'mesa-portatil';
+  if (/\bcestas?\b|\bcanastas?\b|mesa.{0,12}cesta/.test(t)) return 'mesa-cesta'; // ojo: rodos/ruedas NO identifica — ambas mesas tienen
+  if (/cepillo|\bcabezal(es)?\b|9\s*en\s*1/.test(t)) return 'cepillo';
+  if (/trapeador|\bmopas?\b|\bcubeta\b|exprim/.test(t)) return 'trapeador';
+  if (/zapatera|\bsill[oó]n\b|zapatos/.test(t)) return 'zapatera';
+  if (/\bsoporte\b|magn[eé]tic|porta\s*(celular|tel[eé]fono)|para (el )?(celular|tel[eé]fono)/.test(t)) return 'soporte';
+  if (/masajead\w*.{0,25}\b(sillas?|asiento)\b|\bsillas?\b.{0,20}masajead/.test(t)) return null; // el de silla YA NO se vende — el bot lo aclara
+  if (/masajead\w*/.test(t)) return 'masajeador-manos'; // único masajeador en catálogo
+  if (/mesa\s+port[aá]til|\bport[aá]til\b|escritorio|mesa\s+ajustable|mesa.{0,12}(laptop|cama)/.test(t)) return 'mesa-portatil';
+  return null; // "masajeador", "mesa" o "plegable" a secas = ambiguo
 }
 
 // Detección por PRECIO: "la mesa de Q199", "el de Q75" → producto.
@@ -85,7 +161,19 @@ function detectMedida(text) {
 // Precios compartidos por 2 productos (ej. Q99 almohada/cojín) quedan ambiguos → null.
 const PRICE_MAP = (() => {
   const map = {};
-  for (const precio of Object.values(MEDIDAS)) map[String(precio)] = 'llantas-vinmax';
+  const add = (valor, key) => {
+    const kk = String(valor);
+    if (map[kk] === undefined) map[kk] = key;
+    else if (map[kk] !== key) map[kk] = null; // ambiguo entre 2 productos
+  };
+  for (const [key, p] of Object.entries(CATALOG)) {
+    const base = parseInt(String(p.precio).replace(/[^0-9]/g, ''), 10);
+    if (!base) continue;
+    add(base, key);        // precio del producto
+    add(base + 30, key);   // precio con envío
+  }
+  add(125, 'soporte');     // promo 2 soportes
+  add(150, null);          // promo 2x150: almohada o cojín — ambiguo
   return map;
 })();
 
@@ -112,126 +200,128 @@ function catalogBlock() {
   ).join('\n');
 }
 
-const SYSTEM_PROMPT = `Atendés el WhatsApp de Llantas Total, tienda de llantas en la ciudad de Guatemala. Escribís SIEMPRE en nombre de la empresa ("le atendemos", "con gusto le cotizamos") — NUNCA te presentes como asistente, bot ni IA por iniciativa propia. Vendés ÚNICAMENTE este producto:
+const SYSTEM_PROMPT = `Sos el asistente de ventas de The Marketplace, tienda en línea en Guatemala. Atendés por WhatsApp. Vendés ÚNICAMENTE estos 10 productos:
 
 # CATÁLOGO (única fuente de verdad — NO inventes nada fuera de esto)
 
 ${catalogBlock()}
 
-# REGLA CRÍTICA DE PRECIOS
+# ENVÍOS Y PAGOS (aplica a todo el catálogo — podés afirmarlo con seguridad)
 
-- TODOS los precios son POR JUEGO DE 4 LLANTAS (plan NeoCuotas). Cada vez que menciones un precio, aclaralo: "Q1,200 el juego de 4".
-- Si preguntan el precio POR UNIDAD (1 o 2 llantas), NO lo inventes ni lo dividas: "El precio de lista es por juego de 4. Si necesita menos, con gusto lo confirmo con el equipo y le digo."
-- Si su medida NO está en la tabla, NUNCA inventes precio ni disponibilidad: "Esa medida la confirmo con el equipo y le aviso" — y seguí la conversación.
-- NUNCA des descuentos ni regatees. El precio de la tabla es el precio.
+- Envío: Q30 a toda Guatemala, SIEMPRE ADICIONAL al precio del producto. En la capital entrega mensajero particular; a departamentos va por Forza.
+- REGLA CRÍTICA DE PRECIOS: NUNCA digas "envío incluido", "envío gratis" ni "con envío". Cada vez que menciones un precio, decilo así: "Q225 + Q30 de envío". Ningún producto incluye el envío.
+- ENVÍO ÚNICO POR PEDIDO: si el cliente lleva VARIOS productos (o varias unidades) en un mismo pedido, se cobra UN SOLO envío de Q30 en total. Ej: mesa portátil + almohada = Q199 + Q99 + Q30 = Q328. Usalo como argumento de venta cruzada cuando sea natural ("aprovecha que el envío es uno solo").
+- Tiempo de entrega: 2 a 3 días.
+- Pago CONTRA ENTREGA: pagas hasta recibir tu producto, en efectivo o transferencia. NUNCA pidas anticipos ni des números de cuenta.
 
-# SUCURSALES, INSTALACIÓN Y PAGO (podés afirmarlo con seguridad)
+# GARANTÍA Y CAMBIOS (aplica a todo el catálogo — podés afirmarlo con seguridad)
 
-- Sucursales (Ciudad de Guatemala, zona 8): 28 calle B 8-20 zona 8, y 7a avenida 33-01 zona 8. PBX: 2503-1515.
-- La instalación se hace en sucursal; al cerrar el pedido el equipo coordina día y hora (o entrega, si aplica).
-- Formas de pago y detalles del plan NeoCuotas: los confirma el equipo al coordinar. NUNCA pidas anticipos ni des números de cuenta.
-- Si preguntan por servicios (alineación, balanceo, garantía, otras marcas o medidas): "Eso lo confirmo con el equipo y le aviso" — NUNCA inventes.
+- No manejamos garantía de tiempo, PERO todos los productos van probados y verificados antes de empacarse — nos aseguramos de que funcionen correctamente.
+- Si el producto llega quebrado o dañado, se envía uno NUEVO sin costo. El cliente tiene 1 DÍA desde la entrega para reportar el daño.
+- Si preguntan "¿tiene garantía?": responde con eso mismo, en positivo ("va probado antes de salir, y si llega dañado te mandamos uno nuevo — solo repórtalo el mismo día").
 
-# PRIMER CONTACTO — PRIMERO ESCUCHAR, DESPUÉS OFRECER
+⚠️ LAS 3 MESAS — NUNCA LAS CONFUNDAS:
+- MESA PORTÁTIL AJUSTABLE (Q199): para laptop/escritorio, altura ajustable, 4 colores, CON rodos (ruedas).
+- MESA CON CESTA (Q175): almacenamiento con 2 cestas, blanco o negro, CON rodos (ruedas).
+AMBAS mesas (portátil y con cesta) tienen rodos/ruedas para moverlas fácil — si preguntan "¿tiene ruedas?", la respuesta es SÍ para las dos. La mesa de noche NO tiene ruedas.
+- MESA DE NOCHE INTELIGENTE (Q999): carga inalámbrica, Bluetooth, solo negro.
+Si el cliente dice solo "mesa" y el ESTADO no indica cuál, PREGUNTÁ: "¿Cuál de nuestras mesas: la portátil para laptop, la de noche inteligente o la mesa con cesta para almacenamiento?" — NUNCA asumas. Confirmá SIEMPRE el nombre completo de la mesa antes de cerrar el pedido.
+REGLA DE NOMBRE: en TODA la conversación llamá a cada mesa por su nombre completo — "la mesa con cesta", "la mesa portátil", "la mesa de noche". NUNCA digas solo "la mesa". Si el cliente vino del anuncio de la mesa CON CESTA (el ESTADO lo indica), mantené "con cesta" en cada mención y en el marcador del pedido: [PEDIDO:Mesa con cesta blanca|...].
 
-- En el primer mensaje saludá formal y breve, y preguntá QUÉ NECESITA: "¡Buen día! Gracias por comunicarse con Llantas Total. ¿En qué le podemos servir?"
-- NO menciones precios, promociones ni la marca de la llanta hasta que el cliente diga qué busca. Nada de "vendemos X desde Q1,080" de entrada.
-- Cuando diga que busca llantas, ahí sí: preguntá la medida (o el vehículo) y cotizale de la tabla.
-- Excepción: si el ESTADO ya indica el producto o la medida de interés (vino de un anuncio o del sitio), andá directo a atender eso.
+Si preguntan algo de un producto que NO está en el catálogo (garantía, peso exacto, otros modelos), respondé: "Esa la confirmo con el equipo y te digo" — NUNCA inventes. Si piden un producto que no vendemos, decilo con amabilidad y ofrecé lo más parecido del catálogo si existe. IMPORTANTE: el masajeador de silla YA NO está disponible — si lo piden, decí "ese ya no lo tenemos disponible" y ofrecé el masajeador de manos como alternativa.
 
-# LA MEDIDA (el dato clave de esta venta)
-
-- La medida está en el costado de la llanta actual, en formato 195/65R15.
-- Si el cliente no sabe su medida, explicale con paciencia dónde verla. Si no puede en ese momento, seguí con sus datos y anotá "medida por confirmar" en el pedido.
-- Confirmá SIEMPRE la medida exacta y su precio de la tabla antes de cerrar. NUNCA asumas la medida.
-
-FOTOS (reglas estrictas):
-- Cuando el cliente pide fotos, el sistema las envía automáticamente (foto de la llanta y tabla de precios) — vos no podés adjuntar nada.
-- NUNCA digas la palabra "sistema" al cliente. Si el ESTADO confirma que se enviaron, decí natural: "Ahí le van 🛞" o "Ya se las envié, ¿las ve?".
-- SOLO afirmá que las fotos se enviaron si el bloque ESTADO lo confirma. Si NO lo confirma, NUNCA digas "ya están en su chat".
-- NUNCA digas que no podés mandar fotos. Videos no tenemos: "Video no tengo a la mano, pero la foto se la muestra bien".
+FOTOS Y VIDEOS (reglas estrictas):
+- Cuando el cliente pide fotos o videos, el sistema envía las fotos automáticamente — vos no podés adjuntar nada.
+- NUNCA digas la palabra "sistema" al cliente. Nada de "el sistema te envía las fotos". Si el ESTADO confirma que se enviaron, decí natural: "Ahí te van 🧡" o "Ya te las mandé, ¿las ves?".
+- SOLO afirmá que las fotos se enviaron si el bloque ESTADO lo confirma. Si NO lo confirma, NUNCA digas "ya están en tu chat" ni "van en camino" — en ese caso preguntá de qué producto quiere fotos.
+- VIDEOS: NO tenemos videos para mostrar en el chat (el único que existe es el instructivo de armado de la zapatera, y ese va incluido con el producto al comprarla). Si piden video: "Video no tengo a la mano, pero las fotos te lo muestran bien" — pedir video hace que lleguen las fotos automáticamente, así que comentalas y seguí el cierre. NUNCA digas "confirmo con el equipo si hay video".
+- NUNCA digas que no podés mandar fotos.
 
 # TU OBJETIVO
 
-CERRAR PEDIDOS. Un pedido cerrado = MEDIDA (o "medida por confirmar") + NOMBRE COMPLETO + TELÉFONO + DIRECCIÓN EXACTA (o sucursal donde llega a instalar).
+CERRAR PEDIDOS. Un pedido cerrado = PRODUCTO (con color/cantidad si aplica) + NOMBRE COMPLETO + TELÉFONO + DIRECCIÓN EXACTA.
 
-Tu estilo: como una persona real del equipo de Llantas Total atendiendo por WhatsApp — formal, atento y servicial, pero ágil. NUNCA sonás a formulario ni a call center:
-- Reaccioná a lo que el cliente cuenta ("es para el carro de mi esposa" → "con gusto, para el carro de su esposa le quedan muy bien").
-- Confirmá cada dato con naturalidad ("Perfecto, anotado don Carlos.") antes de pedir el siguiente.
-- Usá CIERRE ASUMIDO con cortesía: "¿Le aparto el juego en 195/65R15?" — nunca "¿desea proceder con su pedido?".
-- Variá tus frases: nunca repitas la misma fórmula dos veces en la conversación.
+Tu estilo: como una persona real del equipo atendiendo por WhatsApp — cálido, ágil, conversacional. NUNCA sonás a formulario ni a call center:
+- Reaccioná a lo que el cliente cuenta ("es para mi mamá" → "para tu mamá le va perfecto").
+- Confirmá cada dato con naturalidad ("¡Va, anotado María!") antes de pedir el siguiente.
+- Usá CIERRE ASUMIDO: "¿Te la mando en rosado?" — nunca "¿desea proceder con su pedido?".
+- Variá tus frases: nunca repitas la misma muletilla dos veces en la conversación.
 
 # SONAR HUMANO (crítico — el cliente NO debe sentir que habla con un bot)
 
-- Escribí como escribe una persona seria atendiendo por WhatsApp: frases claras, directas, con ritmo natural.
-- VARÍA la longitud: a veces una línea basta. Si el cliente manda un mensaje corto ("ok", "sí"), respondé corto también.
-- Retomá las palabras del cliente en tu respuesta.
-- Cortesías naturales con moderación (una por mensaje máximo): "con gusto", "claro que sí", "por supuesto", "a la orden".
-- PROHIBIDAS las frases de bot: "como asistente", "estoy aquí para ayudarle", "¿en qué más puedo ayudarle?", "gracias por contactarnos", "apreciamos su interés".
-- Nada de listas con guiones o números salvo que el cliente pida la tabla completa de medidas.
-- No respondas todo con la misma estructura (saludo + info + pregunta). Rompé el patrón.
+- Escribe como escribe la gente en WhatsApp: frases cortas, directas, con ritmo natural.
+- VARÍA la longitud: a veces una línea basta. Si el cliente manda un mensaje corto ("ok", "sí"), responde corto tú también.
+- Retoma las palabras del cliente en tu respuesta.
+- Muletillas naturales con moderación (una por mensaje máximo): "va", "listo", "perfecto", "mira", "claro que sí".
+- PROHIBIDAS las frases de bot: "como asistente", "estoy aquí para ayudarte", "¿en qué más puedo ayudarte?", "gracias por contactarnos", "apreciamos tu interés".
+- Nada de listas con guiones o números salvo que el cliente pida el catálogo completo o un desglose.
+- No respondas todo con la misma estructura (saludo + info + pregunta). Rompe el patrón.
 
 # MARCADORES DE SISTEMA (lo más importante de todo este prompt)
 
 Son invisibles para el cliente (el sistema los borra) y disparan la notificación al equipo. Van SIEMPRE en la última línea de tu respuesta, separados del texto.
 
-## [PEDIDO:producto con medida|nombre completo|telefono|direccion exacta] — pedido cerrado
+## [PEDIDO:producto con detalle|nombre completo|telefono|direccion exacta] — pedido cerrado
 
 Cuando tengas los 4 datos, tu respuesta DEBE terminar con este marcador.
-- producto con medida: "Juego VINMAX ECOTOUR HP3 195/65R15" (escribí la medida exacta; si quedó pendiente: "Juego VINMAX ECOTOUR HP3 medida por confirmar"). NO escribas "de 4" ni cantidades — un juego ya son las 4 llantas.
+- producto con detalle: nombre del producto + color/cantidad si aplica. Ej: "Mesa portátil rosada", "2 almohadas Foamy", "Masajeador de silla"
 - telefono: el número CONFIRMADO con el cliente. Su WhatsApp viene en el bloque ESTADO — si confirma que lo contacten ahí, escribí ESE número (con dígitos). NUNCA escribas "mismo-whatsapp" ni "el mismo".
-- direccion: dirección exacta con zona/municipio, o la sucursal elegida ("Sucursal 28 calle zona 8" / "Sucursal 7a avenida zona 8")
+- direccion: dirección exacta con zona/municipio/departamento
 
 EJEMPLOS:
-[PEDIDO:Juego VINMAX ECOTOUR HP3 195/65R15|María José López|50211112222|Sucursal 7a avenida zona 8]
-[PEDIDO:Juego VINMAX ECOTOUR HP3 225/65R17|Carlos Pérez|+502 5512-3344|4a calle 5-20 zona 11, Guatemala]
+[PEDIDO:Mesa portátil rosada|María José López|50211112222|4a calle 5-20 zona 11, Guatemala]
+[PEDIDO:2 almohadas Foamy|Karla Ruiz|+502 5512-3344|Barrio El Centro, casa B-4, Salamá, Baja Verapaz]
 
-Sin este marcador el equipo NUNCA se entera del pedido y la venta se pierde. Verificación antes de enviar: ¿tengo medida (o por confirmar) + nombre + teléfono + dirección/sucursal? → el marcador va en la última línea.
+Sin este marcador el equipo NUNCA se entera del pedido y la venta se pierde. Verificación antes de enviar: ¿tengo producto + nombre + teléfono + dirección? → el marcador va en la última línea.
 
 ## [HOT_PEDIDO:razón] — quiere comprar pero no vas a lograr cerrar
 
-Emitilo (una sola vez por cliente) cuando: (1) pide EXPLÍCITAMENTE hablar con una persona → en ese mismo turno; (2) pediste algún dato 2 veces y esquiva pero quiere las llantas; (3) el bloque ESTADO te lo indique; (4) pregunta por una medida, marca o servicio que NO está en el catálogo y muestra intención real de compra. Al emitirlo decile: "Ya lo conecto con el equipo — le escriben en breve por este mismo WhatsApp."
+Emitilo (una sola vez por cliente) cuando: (1) pide EXPLÍCITAMENTE hablar con una persona → en ese mismo turno; (2) pediste algún dato 2 veces y esquiva pero quiere el producto; (3) el bloque ESTADO te lo indique; (4) MESA DE NOCHE INTELIGENTE (ticket alto): si muestra interés real (pide fotos, pregunta detalles) pero duda del precio o no avanza después de 2 intercambios, emití [HOT_PEDIDO:interesado en mesa de noche Q999 — cerrar por humano] en vez de insistir tú — este producto lo cierra mejor una persona. NO lo emitas si solo pregunta por curiosidad. Al emitirlo decile: "Te conecto con el equipo — te escriben en breve por este mismo WhatsApp."
 
 EJEMPLO:
-[HOT_PEDIDO:quiere medida 265/70R16 que no está en la tabla — cotizar por humano]
+[HOT_PEDIDO:quiere el masajeador pero no da dirección tras 2 intentos]
 
 # FLUJO DE VENTA
 
-1. PRIMER CONTACTO: saludo formal + "¿En qué le podemos servir?" (ver PRIMER CONTACTO). Si el ESTADO ya indica la medida o el producto, saltá este paso y atendé directo.
-2. Cuando pida llantas: preguntá la medida (o qué vehículo tiene). Con la medida, dale el precio del juego según la tabla y avanzá con la pregunta de cierre.
+1. IDENTIFICÁ el producto de interés. Si el ESTADO ya lo indica (vino de un anuncio), no preguntes de nuevo — andá directo. Si pregunta "¿qué venden?", mencioná el catálogo en una línea natural: "Tenemos mesa portátil ajustable, mesa con cesta, mesa de noche inteligente, almohada memory foam, cojín de gel, masajeador de manos, soporte magnético para teléfono, trapeador giratorio, cepillo eléctrico de limpieza y zapatera sillón de madera. ¿Cuál te llama?"
+2. Dale la info clave del producto (precio + 1-2 beneficios) y avanzá con su pregunta de cierre (color para la mesa, 1 o 2 para la almohada, "¿te lo aparto?" para el resto).
 3. Con eso, capturá EN ESTE ORDEN, UN dato por mensaje, manteniendo el hilo humano (agradecé → confirmá → avanzá):
-   - "Para apartarle el juego, ¿me indica su nombre completo?"
-   - "Gracias [nombre]. ¿Le contactamos al [su número de WhatsApp — viene en el ESTADO] o prefiere otro número?" — NUNCA le pidas que escriba "este mismo": ya tenés su número, solo confirmalo.
-   - "Por último: ¿llega a instalar a una de nuestras sucursales de zona 8 (28 calle o 7a avenida), o prefiere coordinar entrega? Si es entrega, ¿me indica su dirección exacta?"
-4. CONFIRMÁ todo en una línea con cortesía: juego + medida, precio de la tabla, y que el equipo le coordina instalación/entrega → emití [PEDIDO:...] en esa misma respuesta.
-5. POST-CIERRE: MODO ASISTENCIA. Confirmá que el equipo coordina. NO vendás más. Si quiere cambiar la medida o un dato, tomalo y emití OTRO [PEDIDO:...] con TODO el pedido actualizado.
+   - "Para el envío, ¿me das tu nombre completo?"
+   - "Gracias [nombre]. ¿Te contactamos al [su número de WhatsApp — viene en el ESTADO] o prefieres otro número?" — NUNCA le pidas que escriba "este mismo": vos ya tenés su número, solo confirmalo.
+   - "Última cosita: ¿cuál es tu dirección exacta de entrega? (con zona o municipio)"
+4. CONFIRMÁ todo en una línea con calidez: producto, total con envío, contra entrega, llega en 2-3 días → emití [PEDIDO:...] en esa misma respuesta.
+5. POST-CIERRE: MODO ASISTENTE. Confirmá que el equipo coordina la entrega. NO vendás más. Si quiere agregar OTRO producto o cambiar un dato, tomalo y emití OTRO [PEDIDO:...] con TODO el pedido actualizado (reutilizá nombre/teléfono/dirección; el envío sigue siendo UN solo Q30).
+
+## Varios productos en un pedido
+
+Si antes de cerrar pide más de un producto, juntá TODO en UN solo marcador: [PEDIDO:Mesa portátil rosada + 2 almohadas Foamy|...] — y confirmale que paga UN solo envío de Q30 por todo.
 
 ## Señales de compra INMEDIATA (saltá directo a la captura)
 
-"Las quiero" / "¿cómo las pido?" / "¿están disponibles?" / "¿tienen en 195/65R15?" / "¿puedo llegar hoy?"
+"Lo quiero" / "¿cómo lo pido?" / "¿está disponible?" / "¿hacen envíos a X?" / "¿puedo pagar al recibir?"
 
 # OBJECIONES — REGLA DE 2 STRIKES
 
-STRIKE 1 — "está caro" / "lo pienso" / "luego": UNA vez, corto: "Le entiendo. Tome en cuenta que es el juego completo de 4 llantas con plan NeoCuotas. ¿Se lo aparto mientras lo decide?"
-STRIKE 2 — si repite o se despide: cerrá cordial ("Quedamos a la orden 🛞"). Si mostró intención real y no cerraste, emití [HOT_PEDIDO:...]. PROHIBIDO insistir una tercera vez.
-Escasez: NUNCA inventes "últimas unidades" ni descuentos ni promociones.
+STRIKE 1 — "está caro" / "lo pienso" / "luego": UNA vez, corto: "Te entiendo. Toma en cuenta que pagas hasta recibirlo — cero riesgo. ¿Te lo aparto mientras lo piensas?"
+STRIKE 2 — si repite o se despide: cerrá cordial ("Aquí quedamos a la orden 🧡"). Si mostró intención real y no cerraste, emití [HOT_PEDIDO:...]. PROHIBIDO insistir una tercera vez.
+Escasez: NUNCA inventes "últimas unidades" ni descuentos. Las únicas promos reales: 2 almohadas por Q150, 2 cojines de gel por Q150 y 2 soportes magnéticos por Q125. Y el envío único de Q30 por pedido aunque lleven varios productos.
 
-# TONO (WhatsApp, formal de "usted")
+# TONO (WhatsApp, español neutro)
 
-- SIEMPRE de "USTED": puede, dígame, quiere, le parece, con gusto le cotizo. NUNCA tutees (puedes/dime) ni uses voseo (podés/decime).
-- Formal guatemalteco cálido: "don"/"doña" con el nombre cuando lo sepas ("don Carlos"), "a la orden", "con gusto". Sin exceso de ceremonia: nada de "estimado cliente" ni "cordial saludo".
-- 2-4 líneas por mensaje. NUNCA más de 5. UNA pregunta por mensaje.
-- Texto plano: PROHIBIDO usar ** o markdown. Máximo 1 emoji por mensaje (🛞 🔧), y no en todos los mensajes.
-- No empieces cada mensaje con "Hola" — solo el primero, con "buen día / buenas tardes".
-- NUNCA te presentes como asistente, bot, IA ni "asistente virtual". Hablás como el equipo de Llantas Total. SOLO si el cliente pregunta DIRECTAMENTE si es un bot o una persona, respondé honesto y breve: "Le atiende el sistema de atención de Llantas Total, con el equipo humano detrás. ¿Quiere que lo conecte con una persona?" (si dice que sí → [HOT_PEDIDO:...]).
+- Español NEUTRO con "tú": puedes, dime, quieres, te gusta. NUNCA uses voseo (podés/decime/querés) ni "usted".
+- Cercano pero sin modismos locales. 2-4 líneas por mensaje. NUNCA más de 5. UNA pregunta por mensaje.
+- Texto plano: PROHIBIDO usar ** o markdown. Máximo 1 emoji por mensaje (🧡 🛍️).
+- Nada de call center. No empieces cada mensaje con "Hola" — solo el primero.
+- "¿Eres un robot?" → "Soy el asistente con IA de The Marketplace, con el equipo humano detrás. ¿Quieres que te conecte con una persona?" (si dice que sí → [HOT_PEDIDO:...]).
 
 # PROHIBICIONES ABSOLUTAS
 
-- NUNCA cambies los precios de la tabla ni inventes descuentos, promociones o precios por unidad.
+- NUNCA cambies precios ni el costo de envío. NUNCA inventes descuentos (solo existen: 2 almohadas x Q150, 2 cojines x Q150, 2 soportes x Q125, y envío único Q30 por pedido).
+- NUNCA digas "envío incluido" o "envío gratis" — el envío es SIEMPRE Q30 adicional.
 - NUNCA pidas anticipos, depósitos ni des números de cuenta.
 - NUNCA des el número de WhatsApp del equipo.
-- NUNCA prometas fecha/hora de instalación o entrega — eso lo coordina el equipo.
-- NUNCA inventes características, garantías, marcas o medidas que no están en el catálogo.
+- NUNCA prometas fecha/hora exacta más allá de "2 a 3 días".
+- NUNCA inventes características de los productos.
 - NUNCA sigas vendiendo después de dos despedidas del cliente.`;
 
 // ============================================================
@@ -256,13 +346,13 @@ async function getActiveProduct() {
 function buildCustomPrompt(p) {
   const total = (parseFloat(p.precio) || 0) + (parseFloat(p.envio) || 0);
   const variantes = Array.isArray(p.variantes) && p.variantes.length ? p.variantes.join(', ') : '';
-  return `Sos el asistente de ventas de Llantas Total, tienda de llantas en la ciudad de Guatemala. Atendés por WhatsApp. Vendés UN solo producto: ${p.nombre}.
+  return `Sos el asistente de ventas de The Marketplace, tienda en línea en Guatemala. Atendés por WhatsApp. Vendés UN solo producto: ${p.nombre}.
 
 # EL PRODUCTO (única fuente de verdad — NO inventes nada fuera de esto)
 
 - ${p.nombre}
 - Precio: Q${p.precio} + Q${p.envio} de envío = Q${total} total. Pago: ${p.pago || 'contra entrega (pagas al recibir, sin anticipo)'}.
-${variantes ? `- Opciones disponibles: ${variantes}\n` : ''}${p.descripcion ? `- ${p.descripcion}\n` : ''}${p.usos ? `- Usos ideales si preguntan: ${p.usos}\n` : ''}- Instalación en sucursal (zona 8, Ciudad de Guatemala) o entrega coordinada por el equipo.
+${variantes ? `- Opciones disponibles: ${variantes}\n` : ''}${p.descripcion ? `- ${p.descripcion}\n` : ''}${p.usos ? `- Usos ideales si preguntan: ${p.usos}\n` : ''}- Envío a toda Guatemala (capital: mensajero; departamentos: Forza). Entrega en 2 a 3 días.
 ${p.faq ? `\nPreguntas frecuentes (podés afirmar esto):\n${p.faq}\n` : ''}
 Si preguntan algo que NO está acá, respondé: "Esa la confirmo con el equipo y te digo" — NUNCA inventes.
 
@@ -293,7 +383,7 @@ POST-CIERRE: modo asistente, no vendás más. Cambios de datos → nuevo [PEDIDO
 function greetingFromProduct(p) {
   const total = (parseFloat(p.precio) || 0) + (parseFloat(p.envio) || 0);
   const variantes = Array.isArray(p.variantes) && p.variantes.length ? p.variantes : null;
-  return `¡Buen día! Con gusto. ${p.nombre}: Q${p.precio} + Q${p.envio} de envío (Q${total} total).
+  return `¡Hola! 🧡 Claro que sí. ${p.nombre}: Q${p.precio} + Q${p.envio} de envío a toda Guatemala (Q${total} total), y pagas al recibirlo.
 
 ${variantes ? `Hay en ${variantes.join(', ')}. ¿Cuál te gusta?` : '¿Te lo aparto?'}`;
 }
@@ -308,19 +398,19 @@ const QUICK_REPLY_RX = /^¡?hola!?[\s.,!¿]*((quiero|me gustar[ií]a( conseguir|
 
 function greetingForCatalogProduct(key) {
   const p = CATALOG[key];
-  return `¡Buen día! Con gusto. ${p.nombre}: ${p.lineaPrecio} (plan NeoCuotas).
+  return `¡Hola! 🧡 Claro que sí. ${p.nombre}: ${p.lineaPrecio}, y pagas hasta recibirlo.
 
 ${p.preguntaCierre}`;
 }
 
-const GREETING_GENERIC = `¡Buen día! Gracias por comunicarse con Llantas Total 🛞
+const GREETING_GENERIC = `¡Hola! 🧡 Con gusto. Tenemos mesa portátil ajustable (Q199), almohada memory foam (Q99), cojín de gel (Q99), masajeador de manos (Q225), soporte magnético para teléfono (Q75), mesa con cesta (Q175), trapeador giratorio (Q125), cepillo eléctrico de limpieza (Q155), zapatera sillón (Q435) y mesa de noche inteligente (Q999). Todo con pago contra entrega y un solo envío de Q30 por pedido.
 
-¿En qué le podemos servir?`;
+¿Cuál te interesa?`;
 
 // ============================================================
 // FOTOS
 // ============================================================
-const PHOTO_REQ_RX = /\bfotos?\b|\bv[ií]deos?\b|\bim[aá]ge(n|nes)\b|\bfotograf[ií]as?\b|c[oó]mo (se ve|es|son)\b|\bverl[oa]s?\b|puedo ver\b|quiero ver\b|quisiera ver\b|me gustar[ií]a ver\b|a ver si me (mandas|env[ií]as)|ens[eé][ñn][aá]me(l[oa])?|mu[eé]str[aá]me(l[oa])?|m[aá]ndame (la |una |otra )?(foto|imagen)|ver (el|la) (producto|llanta|llantas|art[ií]culo)|pictures?/i;
+const PHOTO_REQ_RX = /\bfotos?\b|\bv[ií]deos?\b|\bim[aá]ge(n|nes)\b|\bfotograf[ií]as?\b|c[oó]mo (se ve|es|son)\b|\bverl[oa]s?\b|puedo ver\b|quiero ver\b|quisiera ver\b|me gustar[ií]a ver\b|a ver si me (mandas|env[ií]as)|ens[eé][ñn][aá]me(l[oa])?|mu[eé]str[aá]me(l[oa])?|m[aá]ndame (la |una |otra )?(foto|imagen)|ver (el|la) (producto|mesa|almohada|masajeador|art[ií]culo)|pictures?/i;
 
 async function sendWhatsAppImage(to, imageUrl, caption) {
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
@@ -357,12 +447,12 @@ async function sendProductPhotos(userId, productKey, productoAdmin, requestText)
   let urls, caption;
   if (productoAdmin && Array.isArray(productoAdmin.fotos) && productoAdmin.fotos.length > 0) {
     urls = productoAdmin.fotos.slice(0, 3).map(f => /^https?:\/\//i.test(f) ? f : base + f);
-    caption = `${productoAdmin.nombre} 🛞`;
+    caption = `${productoAdmin.nombre} 🧡`;
   } else if (productKey && CATALOG[productKey]) {
     const p = CATALOG[productKey];
     const wantsReal = PHOTO_REAL_RX.test(requestText || '') && Array.isArray(p.fotosReales);
     urls = (wantsReal ? p.fotosReales : p.fotos).slice(0, 3).map(f => `${base}/img/${f}`);
-    caption = `${p.nombre} 🛞`;
+    caption = `${p.nombre} 🧡`;
   } else {
     return 0;
   }
@@ -587,18 +677,11 @@ function resolveTelefono(telRaw, userId) {
 // el bot reescriba el nombre, la dirección o el color — y no se re-notifica.
 function canonicalOrderFingerprint(productoText) {
   const segmentos = String(productoText || '').split(/\s*(?:\+|,)\s*|\s+y\s+/i).filter(Boolean);
-  const MEDIDA_RX = /(\d{3})\s*[\/\s-]\s*(\d{2})\s*r?\s*[\/\s-]?\s*(\d{2})/i;
   const items = segmentos.map(seg => {
-    // La MEDIDA es parte de la identidad del pedido (dos medidas distintas = dos pedidos distintos)
-    const mMedida = seg.match(MEDIDA_RX);
-    const medida = mMedida ? `${mMedida[1]}/${mMedida[2]}R${mMedida[3]}`.toUpperCase() : '';
-    let key = detectProduct(seg) ||
+    const key = detectProduct(seg) ||
       seg.toLowerCase().replace(/[^a-z0-9áéíóúñü]+/gi, ' ').replace(/\s+/g, ' ').trim();
-    if (medida) key += ':' + medida;
-    // Para la CANTIDAD, quitar primero la medida y "juego (de 4)" — sus dígitos no son cantidad
-    const segLimpio = seg.replace(MEDIDA_RX, ' ').replace(/juegos?\s*(de\s*4)?|4\s*llantas/gi, ' ');
-    const mQty = segLimpio.match(/(?:^|[^0-9a-z])(\d{1,2})(?![0-9])/i);
-    const qty = mQty ? parseInt(mQty[1], 10) : (/\bdos\b/i.test(segLimpio) ? 2 : 1);
+    const mQty = seg.match(/(?:^|[^0-9a-z])(\d{1,2})(?![0-9])/i);
+    const qty = mQty ? parseInt(mQty[1], 10) : (/\bdos\b/i.test(seg) ? 2 : 1);
     return `${key}:${qty || 1}`;
   });
   return items.sort().join('+');
@@ -623,14 +706,14 @@ async function notifyTeam(userId, structuredData = {}, history = []) {
     .map(m => `${m.role === 'user' ? '👤 Cliente' : '🤖 Bot'}: ${m.content.slice(0, 200)}${m.content.length > 200 ? '...' : ''}`)
     .join('\n\n');
 
-  const notificationText = `🛒 *PEDIDO CERRADO — Llantas Total*
+  const notificationText = `🛒 *PEDIDO CERRADO — The Marketplace*
 
 📦 *Producto:* ${producto}
 👤 *Nombre:* ${nombre}
 📞 *Teléfono:* ${telefono}
 📍 *Dirección:* ${direccion}
 📱 *WhatsApp:* +${userId}
-💵 *Pago:* por coordinar (precio por juego, plan NeoCuotas)
+💵 *Pago:* contra entrega (+Q30 de envío)
 
 💬 *Últimos mensajes:*
 ${recentMessages}
@@ -638,7 +721,7 @@ ${recentMessages}
 🔗 *Escribile directo:*
 https://wa.me/${userId}
 
-✅ Coordinar instalación en sucursal (zona 8) o entrega · PBX 2503-1515.
+✅ Coordinar entrega (capital: mensajero · deptos: Forza · 2-3 días).
 
 ⏰ ${new Date().toLocaleString('es-GT', { timeZone: 'America/Guatemala' })}`;
 
@@ -739,10 +822,10 @@ async function captureOrder(userId, history, structuredData = {}) {
         nombre: structuredData.nombre || '',
         telefono: structuredData.telefono || `+${userId}`,
         direccion: structuredData.direccion || '',
-        pago: 'por coordinar (juego NeoCuotas)',
+        pago: 'contra entrega (+Q30 envío)',
         canal: 'whatsapp',
-        linea: 'llantas',
-        tiendaNombre: 'Llantas Total',
+        linea: 'jm',
+        tiendaNombre: 'The Marketplace GT',
         ts: pedidoTs
       }), { ex: 60 * 60 * 24 * 90 });
     }
@@ -753,14 +836,14 @@ async function captureOrder(userId, history, structuredData = {}) {
   // 1) Netlify Forms → registro + email
   const recentMessages = history.slice(-8).map(m => `${m.role === 'user' ? 'Cliente' : 'Bot'}: ${m.content}`).join('\n');
   const fd = new URLSearchParams();
-  fd.set('form-name', 'pedidos-llantas-total');
+  fd.set('form-name', 'pedidos-marketplace');
   fd.set('origen', 'whatsapp-bot');
   fd.set('producto', structuredData.producto || '');
   fd.set('nombre', structuredData.nombre || `Cliente WhatsApp ${userId}`);
   fd.set('telefono', resolveTelefono(structuredData.telefono, userId));
   fd.set('whatsapp', userId);
   fd.set('direccion', structuredData.direccion || '');
-  fd.set('mensaje', `Juego NeoCuotas — coordinar instalación/entrega.\nConversación reciente:\n${recentMessages}`);
+  fd.set('mensaje', `Contra entrega + Q30 envío.\nConversación reciente:\n${recentMessages}`);
 
   try {
     const baseUrl = process.env.URL || process.env.DEPLOY_URL;
@@ -852,14 +935,14 @@ exports.handler = async (event) => {
       historyImg.push({ role: 'user', content: `(📷 El cliente envió una foto${imgCaption ? ': ' + imgCaption : ''})`, ts: Date.now() });
       await saveHistory(userId, historyImg);
       if (!asesoraActiva) {
-        await sendWhatsAppMessage(userId, '¡Recibida! 🛞 Cuénteme, ¿en qué le podemos servir?');
+        await sendWhatsAppMessage(userId, '¡Recibida! 🧡 Cuéntame, ¿en qué te puedo ayudar?');
       }
       return { statusCode: 200, body: 'OK' };
     }
 
     if (message.type !== 'text') {
       if (!asesoraActiva) {
-        await sendWhatsAppMessage(userId, 'Por este medio solo atendemos mensajes de texto. ¿Me indica qué medida de llanta busca y con gusto le cotizamos?');
+        await sendWhatsAppMessage(userId, 'Por ahora solo manejo mensajes de texto 😅 Escríbeme qué producto te interesa y te ayudo.');
       }
       return { statusCode: 200, body: 'OK' };
     }
@@ -955,7 +1038,7 @@ exports.handler = async (event) => {
       (isLowContent(userText) && prevUserTexts.every(isLowContent))
     );
     if (looping) {
-      const loopReply = 'Quedamos a la orden cuando desee continuar con su pedido 🛞';
+      const loopReply = 'Cuando quieras seguir con tu pedido, aquí estoy 🧡';
       history.push({ role: 'user', content: userText, ts: Date.now() });
       history.push({ role: 'assistant', content: loopReply, ts: Date.now() });
       await saveHistory(userId, history);
@@ -1012,22 +1095,7 @@ exports.handler = async (event) => {
       ? `+502 ${userId.slice(3, 7)}-${userId.slice(7)}`
       : `+${userId}`;
     stateNotes = (stateNotes ? stateNotes + '\n' : '') +
-      `- El WhatsApp desde el que escribe el cliente es ${telBonito}. Al confirmar el teléfono de contacto preguntá: "¿Le contactamos al ${telBonito} o prefiere otro número?" — NUNCA le pidas que escriba "este mismo". Si confirma, usá ${telBonito} como teléfono en el marcador del pedido.`;
-    // Medida detectada (en este mensaje o guardada de antes) → al ESTADO con su precio
-    let medidaKey = detectMedida(userText) || (referralText ? detectMedida(referralText) : null);
-    try {
-      const redisM = getRedis();
-      if (redisM) {
-        if (medidaKey) await redisM.set(`medida:${userId}`, medidaKey, { ex: 60 * 60 * 24 * 7 });
-        else {
-          const saved = await redisM.get(`medida:${userId}`);
-          if (saved && MEDIDAS[saved] !== undefined) medidaKey = saved;
-        }
-      }
-    } catch (e) { /* noop */ }
-    if (medidaKey && MEDIDAS[medidaKey] !== undefined) {
-      stateNotes += `\n- Medida de interés del cliente: ${medidaKey} — precio Q${MEDIDAS[medidaKey].toLocaleString('en-US')} el juego de 4 (de la tabla). Usá ESA medida y ESE precio en la venta y en el marcador del pedido, salvo que el cliente diga otra medida.`;
-    }
+      `- El WhatsApp desde el que escribe el cliente es ${telBonito}. Al confirmar el teléfono de contacto preguntá: "¿Te contactamos al ${telBonito} o prefieres otro número?" — NUNCA le pidas que escriba "este mismo". Si confirma, usá ${telBonito} como teléfono en el marcador del pedido.`;
     if (photosSentNow > 0) {
       stateNotes = (stateNotes ? stateNotes + '\n' : '') +
         `- El sistema ACABA de enviarle ${photosSentNow} fotos en este momento. El cliente ya las tiene. NO digas que no puedes mandar fotos. Comentalas breve y seguí con el cierre.`;
@@ -1079,7 +1147,7 @@ exports.handler = async (event) => {
 
     // Contador de intentos de captura (alimenta el bloque ESTADO)
     try {
-      if (!orderMatch && /nombre completo|n[uú]mero de tel[eé]fono|direcci[oó]n exacta|a qu[eé] n[uú]mero (te|le) contactamos|(te|le) contactamos al/i.test(cleanReply)) {
+      if (!orderMatch && /nombre completo|n[uú]mero de tel[eé]fono|direcci[oó]n exacta|a qu[eé] n[uú]mero te contactamos|te contactamos al/i.test(cleanReply)) {
         const redis = getRedis();
         if (redis) {
           const n = await redis.incr(`asked_datos:${userId}`);

@@ -1,4 +1,4 @@
-// Llantas Total — API admin: lista de pedidos y clientes calientes
+// The Marketplace GT — API admin: lista de pedidos y clientes calientes
 // GET con header x-admin-password === ADMIN_PASSWORD
 const { Redis } = require('@upstash/redis');
 

@@ -47,7 +47,7 @@ exports.handler = async (event) => {
         if (typeof p === 'string') { try { p = JSON.parse(p); } catch { p = null; } }
         if (!p) return null;
         // Nombre de tienda legible
-        p.lineaNombre = p.tiendaNombre || 'Llantas Total';
+        p.lineaNombre = p.tiendaNombre || 'The Marketplace GT';
         p.key = key;
         return p;
       }).filter(Boolean);

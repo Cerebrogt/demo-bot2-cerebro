@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Llantas Total · Panel</title>
+<title>The Marketplace GT · Panel</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/png" href="/assets/jm-logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
   :root{
     /* 🎨 PALETA EDITABLE — cambia estos 3 colores para adaptar el panel a cualquier marca.
        --rosa = color principal · --rosa-suave = fondo claro · --rosa-borde = bordes */
-    --rosa:#1657A7; --rosa-suave:#EAF2FC; --rosa-borde:#BFD7F2;
+    --rosa:#F4821F; --rosa-suave:#FFF4E6; --rosa-borde:#F6D5AE;
     --negro:#1a1a1a; --dorado:#C9A227; --gris:#8a8a8f; --fondo:#F7F9FC; --blanco:#fff;
   }
   *{box-sizing:border-box; margin:0; padding:0}
@@ -192,8 +192,8 @@
 <!-- ===== LOGIN ===== -->
 <div class="login-wrap" id="loginScreen">
   <div class="login-card">
-    <img src="/assets/jm-logo.png" alt="Llantas Total" onerror="this.outerHTML='<div style=&quot;font-size:26px;font-weight:700;color:var(--rosa);margin-bottom:10px;&quot;>🛞 LLANTAS TOTAL</div>'">
-    <div class="login-sub">Panel de administración · Llantas Total 🛞</div>
+    <img src="/assets/jm-logo.png" alt="The Marketplace GT" onerror="this.outerHTML='<div style=&quot;font-size:26px;font-weight:700;color:var(--rosa);margin-bottom:10px;&quot;>🛒 THE MARKETPLACE GT</div>'">
+    <div class="login-sub">Panel de administración · Diseños que empoderan 💕</div>
     <input type="password" class="login-input" id="loginInput" placeholder="Contraseña" autocomplete="current-password">
     <button class="login-btn" id="loginBtn">Entrar</button>
     <div class="login-err" id="loginErr">Contraseña incorrecta</div>
@@ -207,7 +207,7 @@
     <div class="brand">
       <img src="/assets/jm-logo.png" alt="JM" onerror="this.style.display='none'">
       <div>
-        <div class="brand-name">Llantas <span>Total</span></div>
+        <div class="brand-name">The <span>Marketplace GT</span></div>
         <div class="brand-tag">💕 PANEL DE ADMINISTRACIÓN</div>
       </div>
     </div>
@@ -445,29 +445,34 @@ function updateStats(){
   $('statDespachados').textContent = peds.filter(p=>p.estado==='despachado').length;
   $('statHot').textContent = convs.filter(c=>c.isHot && !c.hotAtendido).length;
 }
-// ===== MONTO DE VENTA (Llantas Total — precio por JUEGO de 4, plan NeoCuotas) =====
-const ENVIO_Q = 0;
+// ===== MONTO DE VENTA (catálogo The Marketplace + promos 2x + Q30 envío único) =====
+const ENVIO_Q = 30;
 const PRECIOS_JM = [
-  { rx: /185\s*\/\s*65\s*r?\s*14/i, precio: 1080 },
-  { rx: /185\s*\/\s*65\s*r?\s*15/i, precio: 1160 },
-  { rx: /195\s*\/\s*60\s*r?\s*15/i, precio: 1200 },
-  { rx: /195\s*\/\s*65\s*r?\s*15/i, precio: 1200 },
-  { rx: /205\s*\/\s*55\s*r?\s*16/i, precio: 1200 },
-  { rx: /225\s*\/\s*65\s*r?\s*17/i, precio: 1960 }
+  { rx: /almohada|foamy|memory/i,               precio: 99,  promo2: 150 },
+  { rx: /coj[ií]n|gel/i,                        precio: 99,  promo2: 150 },
+  { rx: /soporte|magn[eé]tic/i,                 precio: 75,  promo2: 125 },
+  { rx: /masajeador.{0,25}silla/i,              precio: 275 },
+  { rx: /masajeador/i,                          precio: 225 },
+  { rx: /mesa\s+de\s+noche|smart|inteligente/i, precio: 999 },
+  { rx: /cesta|canasta/i,                       precio: 175 },
+  { rx: /mesa/i,                                precio: 199 },
+  { rx: /trapeador|mopa/i,                      precio: 125 },
+  { rx: /cepillo|cabezal/i,                     precio: 155 },
+  { rx: /zapatera|sill[oó]n/i,                  precio: 435 }
 ];
 function montoPedido(productoText){
   const segs = String(productoText||'').split(/\s*(?:\+|,)\s*|\s+y\s+/i).filter(Boolean);
   let subtotal = 0, reconocido = false;
-  for(let seg of segs){
+  for(const seg of segs){
     const item = PRECIOS_JM.find(p => p.rx.test(seg));
     if(!item) continue;
     reconocido = true;
-    // "juego de 4" / "4 llantas" NO es cantidad: el precio ya es por juego completo
-    seg = seg.replace(/juegos?\s*(de\s*4)?|de\s*4|x\s*4|4\s*llantas/gi, '');
     const mQty = seg.match(/(?:^|[^0-9a-zA-Z])(\d{1,2})(?![0-9])/);
     let qty = mQty ? parseInt(mQty[1],10) : (/\bdos\b/i.test(seg) ? 2 : 1);
     if(!qty || qty < 1) qty = 1;
-    subtotal += item.precio * qty;
+    if(qty === 2 && item.promo2) subtotal += item.promo2;
+    else if(item.promo2 && qty > 2 && qty % 2 === 0) subtotal += (qty/2)*item.promo2;
+    else subtotal += item.precio * qty;
   }
   return reconocido ? subtotal + ENVIO_Q : null;
 }
@@ -592,7 +597,7 @@ function exportarExcel(){
   XLSX.utils.book_append_sheet(wb, ws, 'Pedidos');
   const desde = $('fDesde').value, hasta = $('fHasta').value;
   const sufijo = desde && hasta ? (desde===hasta ? desde : `${desde}_a_${hasta}`) : gtDateStr(Date.now());
-  XLSX.writeFile(wb, `pedidos-llantas-total${pCant>0?`-ultimos-${pCant}`:''}-${sufijo}.xlsx`);
+  XLSX.writeFile(wb, `pedidos-marketplace-jm${pCant>0?`-ultimos-${pCant}`:''}-${sufijo}.xlsx`);
 }
 
 function $(id){ return document.getElementById(id); }
@@ -760,7 +765,7 @@ async function exportarConversaciones(){
     ws2['!cols'] = [{wch:20},{wch:11},{wch:18},{wch:14},{wch:90}];
     XLSX.utils.book_append_sheet(wb, ws2, 'Mensajes');
     const sufijo = (hotOnly ? '-calientes' : '') + (cant > 0 ? `-ultimas-${cant}` : '');
-    XLSX.writeFile(wb, `conversaciones-llantas-total${sufijo}-${gtDateStr(Date.now())}.xlsx`);
+    XLSX.writeFile(wb, `conversaciones-marketplace-jm${sufijo}-${gtDateStr(Date.now())}.xlsx`);
   }catch(e){ console.error(e); alert('Error generando el Excel'); }
 }
 
@@ -921,8 +926,18 @@ function closeChat(){ $('chatModal').classList.remove('open'); const fs=document
 const GALERIA = [
   // 🖼️ GALERÍA DEL SITIO — medios que la asesora puede enviar con un clic desde el chat.
   // Solo URLs alojadas en ESTE sitio de Netlify (panel-send lo valida).
-  { nombre: '🛞 Llanta VINMAX ECOTOUR HP3', url: 'https://cerebrobot2.netlify.app/img/llantas/vinmax-ecotour-hp3.jpg', kind: 'image', caption: 'Llanta VINMAX ECOTOUR HP3 🛞' },
-  { nombre: '💰 Tabla de precios (juego de 4)', url: 'https://cerebrobot2.netlify.app/img/llantas/tabla-precios.jpg', kind: 'image', caption: 'Precios por juego de 4 llantas — plan NeoCuotas' },
+  { nombre: '🪵 Mesa Portátil (laptop)',   url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa/mesa-madera-laptop.jpg', kind: 'image', caption: 'Mesa Portátil Ajustable — Q199 + Q30 de envío 🧡' },
+  { nombre: '🪵 Mesa Portátil (colores)',  url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa/mesa-colores.jpg', kind: 'image', caption: 'Disponible en rosado, beige, blanco y negro' },
+  { nombre: '🪵 Mesa Portátil (real)',     url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa/mesa-real-angulo.jpg', kind: 'image', caption: 'Foto real de la Mesa Portátil' },
+  { nombre: '😴 Almohada Foamy',           url: 'https://luminous-zuccutto-8f822b.netlify.app/img/almohada/almohada-1.jpg', kind: 'image', caption: 'Almohada memory foam — Q99 · 2 por Q150' },
+  { nombre: '🪑 Cojín de Gel',             url: 'https://luminous-zuccutto-8f822b.netlify.app/img/cojin-gel/cojin-gel-1.jpg', kind: 'image', caption: 'Cojín de Gel ortopédico — Q99 · 2 por Q150' },
+  { nombre: '💆 Masajeador de Manos',      url: 'https://luminous-zuccutto-8f822b.netlify.app/img/masajeador-manos/masajeador-manos-1.jpg', kind: 'image', caption: 'Masajeador de Manos recargable — Q225 + Q30 de envío' },
+  { nombre: '🧺 Mesa con Cesta',           url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa-cesta/mesa-cesta-1.jpg', kind: 'image', caption: 'Mesa con Cesta — Q175 + Q30 de envío (blanco o negro)' },
+  { nombre: '📱 Soporte Magnético',        url: 'https://luminous-zuccutto-8f822b.netlify.app/img/soporte/soporte-1.jpg', kind: 'image', caption: 'Soporte Magnético — Q75 · 2 por Q125' },
+  { nombre: '🧹 Trapeador Giratorio',      url: 'https://luminous-zuccutto-8f822b.netlify.app/img/trapeador/trapeador-1.jpg', kind: 'image', caption: 'Trapeador Giratorio — Q125 + Q30 de envío' },
+  { nombre: '🧽 Cepillo Eléctrico',        url: 'https://luminous-zuccutto-8f822b.netlify.app/img/cepillo/cepillo-1.jpg', kind: 'image', caption: 'Cepillo Eléctrico 9 en 1 — Q155 + Q30 de envío' },
+  { nombre: '👞 Zapatera Sillón',          url: 'https://luminous-zuccutto-8f822b.netlify.app/img/zapatera/zapatera-1.jpg', kind: 'image', caption: 'Zapatera Sillón de madera — Q435 + Q30 de envío' },
+  { nombre: '🛏️ Mesa de Noche Smart',      url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa-noche/mesa-noche-1.jpg', kind: 'image', caption: 'Mesa de Noche Inteligente — Q999 + Q30 de envío' },
 ];
 
 function burbujaAsesoraLocal(texto){

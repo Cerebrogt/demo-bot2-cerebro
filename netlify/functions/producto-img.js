@@ -1,4 +1,4 @@
-// Llantas Total — sirve las imágenes de producto subidas desde el admin (Netlify Blobs)
+// The Marketplace GT — sirve las imágenes de producto subidas desde el admin (Netlify Blobs)
 // PÚBLICO (sin clave): WhatsApp necesita poder descargar la imagen desde esta URL.
 const { getStore } = require('@netlify/blobs');
 
