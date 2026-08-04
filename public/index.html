@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Marketplace · Más productos, más ofertas</title>
+  <title>CUCO Store · Ofertas que valen la pena</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --orange: #F4821F;
-      --orange-dark: #D96A0A;
-      --yellow: #FFCC00;
-      --orange-light: #FFF4E6;
-      --text: #1A1A1A;
+      --morado: #5B2AA6;
+      --morado-dark: #44207D;
+      --lila: #9B6FE0;
+      --amarillo: #F5C33B;
+      --morado-light: #F3EDFC;
+      --text: #1A1424;
       --gray: #F7F7F7;
       --border: #EBEBEB;
       --white: #FFFFFF;
@@ -26,39 +28,17 @@
       position: sticky; top: 0; z-index: 100;
       background: var(--white);
       box-shadow: 0 2px 12px rgba(0,0,0,.08);
-      padding: 12px 24px;
+      padding: 10px 24px;
       display: flex; align-items: center; gap: 16px;
     }
-    .logo {
-      display: flex; align-items: center; gap: 10px;
-      text-decoration: none; flex-shrink: 0;
-    }
-    .logo-icon {
-      width: 44px; height: 44px;
-      background: var(--orange);
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .logo-icon svg { width: 28px; height: 28px; fill: white; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+    .logo img { height: 46px; border-radius: 10px; }
     .logo-text { line-height: 1.1; }
-    .logo-text span { display: block; font-size: 13px; font-weight: 900; color: var(--orange); text-transform: lowercase; letter-spacing: -.3px; }
-    .logo-text small { font-size: 10px; color: #888; font-weight: 600; }
+    .logo-text span { display: block; font-size: 15px; font-weight: 900; color: var(--morado); }
+    .logo-text small { font-size: 10px; color: #888; font-weight: 700; }
 
-    .search-wrap { flex: 1; max-width: 500px; position: relative; }
-    .search-wrap input {
-      width: 100%; padding: 10px 44px 10px 16px;
-      border: 2px solid var(--border);
-      border-radius: 50px; font-family: inherit; font-size: 14px;
-      outline: none; transition: border .2s;
-    }
-    .search-wrap input:focus { border-color: var(--orange); }
-    .search-wrap button {
-      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-      background: var(--orange); border: none; border-radius: 50%;
-      width: 32px; height: 32px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .search-wrap button svg { width: 16px; height: 16px; fill: white; }
+    .nav-info { flex: 1; text-align: right; font-size: 13px; font-weight: 700; color: #666; }
+    .nav-info strong { color: var(--morado); }
 
     .nav-cta {
       background: #25D366; color: white;
@@ -73,7 +53,7 @@
 
     /* ── HERO ── */
     .hero {
-      background: linear-gradient(135deg, #F4821F 0%, #FFCC00 100%);
+      background: linear-gradient(135deg, #44207D 0%, #5B2AA6 55%, #9B6FE0 100%);
       padding: 56px 24px;
       text-align: center;
       position: relative; overflow: hidden;
@@ -81,132 +61,106 @@
     .hero::before {
       content: '';
       position: absolute; inset: 0;
-      background: radial-gradient(circle at 70% 30%, rgba(255,255,255,.15) 0%, transparent 60%);
+      background: radial-gradient(circle at 70% 30%, rgba(255,255,255,.14) 0%, transparent 60%);
     }
     .hero-tag {
       display: inline-block;
-      background: rgba(255,255,255,.25);
-      color: white;
-      font-size: 12px; font-weight: 800;
+      background: var(--amarillo);
+      color: #44207D;
+      font-size: 12px; font-weight: 900;
       padding: 4px 14px; border-radius: 50px;
       letter-spacing: .5px; text-transform: uppercase;
-      margin-bottom: 16px;
+      margin-bottom: 16px; position: relative;
     }
     .hero h1 {
-      font-size: clamp(32px, 6vw, 64px);
+      font-size: clamp(32px, 6vw, 60px);
       font-weight: 900; color: white;
-      line-height: 1.05; margin-bottom: 12px;
+      line-height: 1.05; margin-bottom: 12px; position: relative;
     }
-    .hero h1 span { color: var(--orange-dark); -webkit-text-stroke: 1px rgba(255,255,255,.3); }
+    .hero h1 span { color: var(--amarillo); }
     .hero p {
-      font-size: 16px; color: rgba(255,255,255,.9);
-      font-weight: 600; margin-bottom: 28px;
+      font-size: 16px; color: rgba(255,255,255,.92);
+      font-weight: 600; margin-bottom: 28px; position: relative;
     }
     .hero-btn {
       display: inline-flex; align-items: center; gap: 8px;
-      background: white; color: var(--orange);
+      background: white; color: var(--morado);
       padding: 14px 32px; border-radius: 50px;
       font-weight: 900; font-size: 16px;
-      text-decoration: none;
-      box-shadow: 0 8px 24px rgba(0,0,0,.15);
+      text-decoration: none; position: relative;
+      box-shadow: 0 8px 24px rgba(0,0,0,.2);
       transition: transform .2s, box-shadow .2s;
     }
-    .hero-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,.2); }
+    .hero-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,.25); }
     .hero-btn svg { width: 20px; height: 20px; fill: #25D366; }
-
-    /* ── CATEGORIES ── */
-    .categories { padding: 28px 24px 0; }
-    .categories h2 { font-size: 13px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; }
-    .cat-chips {
-      display: flex; gap: 10px; flex-wrap: wrap;
-    }
-    .chip {
-      padding: 8px 18px; border-radius: 50px;
-      border: 2px solid var(--border);
-      background: white; font-family: inherit;
-      font-size: 13px; font-weight: 700; cursor: pointer;
-      transition: all .15s; color: var(--text);
-    }
-    .chip:hover, .chip.active {
-      background: var(--orange); border-color: var(--orange); color: white;
-    }
 
     /* ── SECTION TITLE ── */
     .section-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 32px 24px 16px;
+      padding: 32px 24px 8px;
     }
     .section-header h2 { font-size: 22px; font-weight: 900; }
-    .section-header h2 span { color: var(--orange); }
-    .section-header a { font-size: 13px; font-weight: 700; color: var(--orange); text-decoration: none; }
+    .section-header h2 span { color: var(--morado); }
+    .section-note { padding: 0 24px 16px; font-size: 13px; color: #888; font-weight: 600; }
 
     /* ── PRODUCT GRID ── */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 16px;
       padding: 0 24px 40px;
+      max-width: 1100px; margin: 0 auto;
     }
-
     .card {
       background: white;
       border-radius: 16px;
       border: 2px solid var(--border);
       overflow: hidden;
       transition: transform .2s, box-shadow .2s;
-      cursor: pointer;
     }
     .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.1); }
-
-    .card-img {
-      width: 100%; aspect-ratio: 1;
-      background: var(--gray);
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-    }
-    .card-img svg { width: 48px; height: 48px; fill: #DDD; }
+    .card-img { width: 100%; aspect-ratio: 1; background: var(--gray); position: relative; }
+    .card-img img { width: 100%; height: 100%; object-fit: cover; }
     .badge {
       position: absolute; top: 10px; left: 10px;
-      background: var(--orange); color: white;
+      background: var(--morado); color: white;
       font-size: 10px; font-weight: 800;
       padding: 3px 8px; border-radius: 50px;
       text-transform: uppercase;
     }
-    .badge.new { background: #8B5CF6; }
-    .badge.hot { background: #EF4444; }
-
+    .badge.oferta { background: #E23A3A; }
+    .badge.liq { background: var(--amarillo); color: #44207D; }
     .card-body { padding: 14px; }
-    .card-cat { font-size: 10px; font-weight: 800; color: var(--orange); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-    .card-name { font-size: 14px; font-weight: 800; margin-bottom: 8px; line-height: 1.3; }
-    .card-price {
-      font-size: 20px; font-weight: 900; color: var(--orange);
-    }
-    .card-price small { font-size: 12px; color: #AAA; font-weight: 600; text-decoration: line-through; margin-left: 6px; }
+    .card-cat { font-size: 10px; font-weight: 800; color: var(--morado); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .card-name { font-size: 15px; font-weight: 900; margin-bottom: 4px; line-height: 1.3; }
+    .card-desc { font-size: 12px; color: #777; font-weight: 600; margin-bottom: 10px; line-height: 1.4; }
+    .card-price { font-size: 20px; font-weight: 900; color: var(--morado); }
+    .card-price small { font-size: 12px; color: #AAA; font-weight: 700; text-decoration: line-through; margin-left: 6px; }
     .card-btn {
       display: block; width: 100%;
       margin-top: 12px;
-      background: var(--orange);
+      background: var(--morado);
       color: white; border: none;
       padding: 10px; border-radius: 10px;
       font-family: inherit; font-size: 13px; font-weight: 800;
       cursor: pointer; transition: background .15s;
     }
-    .card-btn:hover { background: var(--orange-dark); }
+    .card-btn:hover { background: var(--morado-dark); }
 
     /* ── BANNER ── */
     .promo-banner {
-      margin: 8px 24px 32px;
-      background: linear-gradient(135deg, #1A1A1A 0%, #333 100%);
+      margin: 8px auto 32px; max-width: 1052px;
+      background: linear-gradient(135deg, #1A1424 0%, #33254D 100%);
       border-radius: 20px;
       padding: 32px;
       display: flex; align-items: center; justify-content: space-between;
       gap: 24px; flex-wrap: wrap;
     }
     .promo-banner h3 { font-size: 24px; font-weight: 900; color: white; }
-    .promo-banner h3 span { color: var(--yellow); }
+    .promo-banner h3 span { color: var(--amarillo); }
     .promo-banner p { color: #AAA; font-size: 14px; margin-top: 4px; }
     .promo-banner a {
-      background: var(--orange); color: white;
+      background: var(--morado); color: white;
       padding: 12px 28px; border-radius: 50px;
       text-decoration: none; font-weight: 800; font-size: 14px;
       white-space: nowrap; flex-shrink: 0;
@@ -214,11 +168,11 @@
 
     /* ── FOOTER ── */
     footer {
-      background: #1A1A1A; color: #888;
+      background: #1A1424; color: #888;
       text-align: center; padding: 24px;
       font-size: 13px;
     }
-    footer strong { color: var(--orange); }
+    footer strong { color: var(--amarillo); }
 
     /* ── FLOATING WA ── */
     .wa-float {
@@ -235,7 +189,7 @@
     .wa-float::before {
       content: '¡Escríbenos!';
       position: absolute; right: 70px;
-      background: #1A1A1A; color: white;
+      background: #1A1424; color: white;
       padding: 6px 12px; border-radius: 8px;
       font-size: 12px; font-weight: 700;
       white-space: nowrap; opacity: 0;
@@ -244,10 +198,10 @@
     .wa-float:hover::before { opacity: 1; }
 
     @media (max-width: 600px) {
-      .search-wrap { max-width: none; }
+      .nav-info { display: none; }
       .nav-cta span { display: none; }
-      .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 12px 32px; }
-      .promo-banner { flex-direction: column; }
+      .grid { grid-template-columns: 1fr; gap: 12px; padding: 0 12px 32px; }
+      .promo-banner { flex-direction: column; margin: 8px 12px 32px; }
     }
   </style>
 </head>
@@ -256,23 +210,16 @@
 <!-- NAV -->
 <nav>
   <a href="#" class="logo">
-    <div class="logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zm0 0h12M3 6h18M16 10a4 4 0 01-8 0"/></svg>
-    </div>
+    <img src="/assets/cuco-logo.png" alt="CUCO Store" />
     <div class="logo-text">
-      <span>the market<br>place.</span>
-      <small>Más productos · más ofertas</small>
+      <span>CUCO Store</span>
+      <small>Ofertas que valen la pena</small>
     </div>
   </a>
 
-  <div class="search-wrap">
-    <input type="text" placeholder="Buscar productos…" />
-    <button>
-      <svg viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>
-    </button>
-  </div>
+  <div class="nav-info">🚚 <strong>Envíos a todo el país</strong> · Pagas al recibir</div>
 
-  <a href="https://wa.me/50249943994" target="_blank" class="nav-cta">
+  <a href="#" class="nav-cta wa-link" target="_blank">
     <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.135.561 4.133 1.535 5.865L.057 23.887l6.197-1.624A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.89 0-3.665-.5-5.2-1.374l-.373-.22-3.863 1.013 1.03-3.772-.242-.388A9.952 9.952 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" fill-rule="evenodd"/></svg>
     <span>Pedir por WhatsApp</span>
   </a>
@@ -280,117 +227,65 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-tag">🛍️ Todo lo que buscás, en un solo lugar</div>
-  <h1>Más productos<br><span>Más ofertas ❤️</span></h1>
-  <p>Encuentra lo que necesitás · Precios accesibles · Entrega rápida</p>
-  <a href="https://wa.me/50249943994" target="_blank" class="hero-btn">
+  <div class="hero-tag">🛍️ Pagas al recibir · Envíos a todo el país</div>
+  <h1>Ofertas que<br><span>valen la pena 💜</span></h1>
+  <p>Productos para tu casa y tu taller · Paga hasta tener tu producto en la mano</p>
+  <a href="#" class="hero-btn wa-link" target="_blank">
     <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.135.561 4.133 1.535 5.865L.057 23.887l6.197-1.624A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.89 0-3.665-.5-5.2-1.374l-.373-.22-3.863 1.013 1.03-3.772-.242-.388A9.952 9.952 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" fill-rule="evenodd"/></svg>
     Pedir ahora por WhatsApp
   </a>
 </section>
 
-<!-- CATEGORIES -->
-<section class="categories">
-  <h2>Categorías</h2>
-  <div class="cat-chips">
-    <button class="chip active">🏷️ Todo</button>
-    <button class="chip">📱 Electrónica</button>
-    <button class="chip">🏠 Hogar</button>
-    <button class="chip">👗 Ropa & Accesorios</button>
-    <button class="chip">🧴 Belleza</button>
-    <button class="chip">🎮 Juguetes</button>
-    <button class="chip">🏋️ Deporte</button>
-    <button class="chip">🛠️ Herramientas</button>
-  </div>
-</section>
-
 <!-- PRODUCTS -->
 <div class="section-header">
-  <h2>Productos <span>destacados</span></h2>
-  <a href="#">Ver todos →</a>
+  <h2>Productos <span>disponibles</span></h2>
 </div>
+<p class="section-note">Pago al recibir · El costo de envío se confirma según tu ubicación</p>
 
 <div class="grid">
 
-  <!-- Producto 1 -->
+  <!-- Soldadora -->
   <div class="card">
     <div class="card-img">
-      <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" stroke="#DDD" stroke-width="1.5" fill="none"/><circle cx="12" cy="17" r="1" fill="#DDD"/></svg>
-      <span class="badge hot">🔥 Oferta</span>
+      <img src="/img/soldadora/soldadora-2.jpg" alt="Máquina Soldadora de Alambre Industrial" loading="lazy">
+      <span class="badge">🔧 Taller</span>
     </div>
     <div class="card-body">
-      <div class="card-cat">Electrónica</div>
-      <div class="card-name">Nombre del producto aquí</div>
-      <div class="card-price">Q 299<small>Q 450</small></div>
-      <button class="card-btn" onclick="pedirWA('Nombre del producto')">Pedir por WhatsApp</button>
+      <div class="card-cat">Herramientas</div>
+      <div class="card-name">Máquina Soldadora de Alambre Industrial</div>
+      <div class="card-desc">3 en 1 MIG/TIG/ARC · 20–250 A regulable · Incluye careta, guantes y alambre</div>
+      <div class="card-price">Q 855</div>
+      <button class="card-btn" onclick="pedirWA('Máquina Soldadora de Alambre Industrial')">Pedir por WhatsApp</button>
     </div>
   </div>
 
-  <!-- Producto 2 -->
+  <!-- Lavadora -->
   <div class="card">
     <div class="card-img">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="#DDD" stroke-width="1.5" fill="none"/><polyline points="9 22 9 12 15 12 15 22" stroke="#DDD" stroke-width="1.5" fill="none"/></svg>
-      <span class="badge new">✨ Nuevo</span>
+      <img src="/img/lavadora/lavadora-2.jpg" alt="Lavadora Mediana" loading="lazy">
+      <span class="badge liq">⚡ Liquidación</span>
     </div>
     <div class="card-body">
       <div class="card-cat">Hogar</div>
-      <div class="card-name">Nombre del producto aquí</div>
-      <div class="card-price">Q 149</div>
-      <button class="card-btn" onclick="pedirWA('Nombre del producto')">Pedir por WhatsApp</button>
+      <div class="card-name">Lavadora Mediana</div>
+      <div class="card-desc">25 lb · Lava y exprime · 100% eléctrica · 58×58 cm · Aguanta chamarras</div>
+      <div class="card-price">Q 900</div>
+      <button class="card-btn" onclick="pedirWA('Lavadora Mediana')">Pedir por WhatsApp</button>
     </div>
   </div>
 
-  <!-- Producto 3 -->
+  <!-- Hidroaspiradora -->
   <div class="card">
     <div class="card-img">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="#DDD" stroke-width="1.5" fill="none"/><path d="M12 8v4l3 3" stroke="#DDD" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+      <img src="/img/hidroaspiradora/hidroaspiradora-2.jpg" alt="Hidroaspiradora Portátil" loading="lazy">
+      <span class="badge oferta">🔥 Oferta</span>
     </div>
     <div class="card-body">
-      <div class="card-cat">Accesorios</div>
-      <div class="card-name">Nombre del producto aquí</div>
-      <div class="card-price">Q 89<small>Q 120</small></div>
-      <button class="card-btn" onclick="pedirWA('Nombre del producto')">Pedir por WhatsApp</button>
-    </div>
-  </div>
-
-  <!-- Producto 4 -->
-  <div class="card">
-    <div class="card-img">
-      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="#DDD" stroke-width="1.5" fill="none"/></svg>
-      <span class="badge hot">🔥 Oferta</span>
-    </div>
-    <div class="card-body">
-      <div class="card-cat">Belleza</div>
-      <div class="card-name">Nombre del producto aquí</div>
-      <div class="card-price">Q 199</div>
-      <button class="card-btn" onclick="pedirWA('Nombre del producto')">Pedir por WhatsApp</button>
-    </div>
-  </div>
-
-  <!-- Producto 5 -->
-  <div class="card">
-    <div class="card-img">
-      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" stroke="#DDD" stroke-width="1.5" fill="none"/><path d="M8 21h8M12 17v4" stroke="#DDD" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
-      <span class="badge new">✨ Nuevo</span>
-    </div>
-    <div class="card-body">
-      <div class="card-cat">Electrónica</div>
-      <div class="card-name">Nombre del producto aquí</div>
-      <div class="card-price">Q 549<small>Q 700</small></div>
-      <button class="card-btn" onclick="pedirWA('Nombre del producto')">Pedir por WhatsApp</button>
-    </div>
-  </div>
-
-  <!-- Producto 6 -->
-  <div class="card">
-    <div class="card-img">
-      <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zM3 6h18" stroke="#DDD" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
-    </div>
-    <div class="card-body">
-      <div class="card-cat">Ropa</div>
-      <div class="card-name">Nombre del producto aquí</div>
-      <div class="card-price">Q 125</div>
-      <button class="card-btn" onclick="pedirWA('Nombre del producto')">Pedir por WhatsApp</button>
+      <div class="card-cat">Hogar</div>
+      <div class="card-name">Hidroaspiradora Portátil</div>
+      <div class="card-desc">Tapicería, sillones, colchones y alfombras · 2 cepillos + 2 cabezales en T</div>
+      <div class="card-price">Q 675<small>Q 1,200</small></div>
+      <button class="card-btn" onclick="pedirWA('Hidroaspiradora Portátil')">Pedir por WhatsApp</button>
     </div>
   </div>
 
@@ -399,42 +294,39 @@
 <!-- PROMO BANNER -->
 <div class="promo-banner">
   <div>
-    <h3>¿No encontraste lo que buscás?<br><span>¡Pregúntanos!</span></h3>
-    <p>Tenemos más de 500 productos disponibles. Escríbenos y te ayudamos.</p>
+    <h3>¿Tienes dudas de algún producto?<br><span>¡Pregúntanos!</span></h3>
+    <p>Escríbenos por WhatsApp y te ayudamos a elegir. Pagas hasta recibir tu producto.</p>
   </div>
-  <a href="https://wa.me/50249943994" target="_blank">Escribir ahora →</a>
+  <a href="#" class="wa-link" target="_blank">Escribir ahora →</a>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <p>© 2026 <strong>The Marketplace Guatemala</strong> · Todos los derechos reservados</p>
-  <p style="margin-top:6px;">Todo lo que buscás, en un solo lugar 🧡</p>
+  <p>© 2026 <strong>CUCO Store</strong> · Todos los derechos reservados</p>
+  <p style="margin-top:6px;">Envíos a todo el país · Pagas al recibir 💜</p>
 </footer>
 
 <!-- FLOATING WA -->
-<a class="wa-float" href="https://wa.me/50249943994" target="_blank">
+<a class="wa-float wa-link" href="#" target="_blank">
   <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.135.561 4.133 1.535 5.865L.057 23.887l6.197-1.624A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.89 0-3.665-.5-5.2-1.374l-.373-.22-3.863 1.013 1.03-3.772-.242-.388A9.952 9.952 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" fill-rule="evenodd"/></svg>
 </a>
 
 <script>
-  // Filtro de categorías
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-    });
-  });
+  // ⚙️ NÚMERO DE WHATSAPP DEL BOT (formato internacional sin +). Cambiar aquí una sola vez.
+  const WA_BOT = '502XXXXXXXX';
 
-  // Abrir WhatsApp con mensaje del producto
+  document.querySelectorAll('.wa-link').forEach(a => { a.href = `https://wa.me/${WA_BOT}`; });
+
+  // Abrir WhatsApp con mensaje del producto (formato que el bot reconoce)
   function pedirWA(producto) {
     const msg = encodeURIComponent(`Hola! Me interesa el producto: *${producto}* 🛍️ ¿Está disponible?`);
-    window.open(`https://wa.me/50249943994?text=${msg}`, '_blank');
+    window.open(`https://wa.me/${WA_BOT}?text=${msg}`, '_blank');
   }
 </script>
 
 <!-- Formulario oculto para Netlify Forms: el bot de WhatsApp registra acá cada pedido
      (queda en el panel de Netlify + dispara email si configurás notificaciones). -->
-<form name="pedidos-marketplace" netlify netlify-honeypot="bot-field" hidden>
+<form name="pedidos-cuco-store" netlify netlify-honeypot="bot-field" hidden>
   <input type="text" name="origen" />
   <input type="text" name="producto" />
   <input type="text" name="nombre" />

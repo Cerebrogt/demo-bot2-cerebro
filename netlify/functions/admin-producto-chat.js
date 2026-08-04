@@ -1,4 +1,4 @@
-// The Marketplace GT — Asistente de configuración de producto (para el panel admin)
+// CUCO Store — Asistente de configuración de producto (para el panel admin)
 // El administrador conversa; el asistente hace UNA pregunta a la vez hasta completar
 // la ficha del producto y al confirmarse la guarda en Redis (producto:activo).
 // POST {messages:[{role,content},...]} · Auth: header x-admin-password
@@ -6,7 +6,7 @@ const { Redis } = require('@upstash/redis');
 
 const PRODUCT_KEY = 'producto:activo';
 
-const SYSTEM = `Sos el asistente de configuración de The Marketplace (Guatemala). Ayudás al administrador a definir el producto que venderá el bot de WhatsApp. Hablás en español guatemalteco, amable y directo.
+const SYSTEM = `Sos el asistente de configuración de CUCO Store (Guatemala). Ayudás al administrador a definir el producto que venderá el bot de WhatsApp. Hablás en español guatemalteco, amable y directo.
 
 Tu trabajo: completar la ficha del producto haciendo UNA pregunta a la vez. Los campos son:
 

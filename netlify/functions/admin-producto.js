@@ -1,4 +1,4 @@
-// The Marketplace GT — API admin: producto activo del bot
+// CUCO Store — API admin: producto activo del bot
 // GET  → devuelve el producto guardado en Redis (producto:activo)
 // POST action=save        → guarda/actualiza el producto (JSON)
 // POST action=upload      → sube una imagen (base64) a Netlify Blobs y la agrega a producto.fotos

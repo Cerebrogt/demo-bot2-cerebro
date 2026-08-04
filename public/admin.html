@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Marketplace GT · Panel</title>
+<title>CUCO Store · Panel</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" href="/assets/jm-logo.png">
+<link rel="icon" type="image/png" href="/assets/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     /* 🎨 PALETA EDITABLE — cambia estos 3 colores para adaptar el panel a cualquier marca.
        --rosa = color principal · --rosa-suave = fondo claro · --rosa-borde = bordes */
-    --rosa:#F4821F; --rosa-suave:#FFF4E6; --rosa-borde:#F6D5AE;
+    --rosa:#5B2AA6; --rosa-suave:#F3EDFC; --rosa-borde:#D9C9F3;
     --negro:#1a1a1a; --dorado:#C9A227; --gris:#8a8a8f; --fondo:#F7F9FC; --blanco:#fff;
   }
   *{box-sizing:border-box; margin:0; padding:0}
@@ -192,8 +192,8 @@
 <!-- ===== LOGIN ===== -->
 <div class="login-wrap" id="loginScreen">
   <div class="login-card">
-    <img src="/assets/jm-logo.png" alt="The Marketplace GT" onerror="this.outerHTML='<div style=&quot;font-size:26px;font-weight:700;color:var(--rosa);margin-bottom:10px;&quot;>🛒 THE MARKETPLACE GT</div>'">
-    <div class="login-sub">Panel de administración · Diseños que empoderan 💕</div>
+    <img src="/assets/cuco-logo.png" alt="CUCO Store" style="max-width:170px" onerror="this.outerHTML='<div style=&quot;font-size:26px;font-weight:700;color:var(--rosa);margin-bottom:10px;&quot;>💜 CUCO STORE</div>'">
+    <div class="login-sub">Panel de administración · CUCO Store 💜</div>
     <input type="password" class="login-input" id="loginInput" placeholder="Contraseña" autocomplete="current-password">
     <button class="login-btn" id="loginBtn">Entrar</button>
     <div class="login-err" id="loginErr">Contraseña incorrecta</div>
@@ -205,9 +205,9 @@
 <div id="app" style="display:none">
   <header>
     <div class="brand">
-      <img src="/assets/jm-logo.png" alt="JM" onerror="this.style.display='none'">
+      <img src="/assets/cuco-logo.png" alt="CUCO Store" onerror="this.style.display='none'">
       <div>
-        <div class="brand-name">The <span>Marketplace GT</span></div>
+        <div class="brand-name">CUCO <span>Store</span></div>
         <div class="brand-tag">💕 PANEL DE ADMINISTRACIÓN</div>
       </div>
     </div>
@@ -445,20 +445,12 @@ function updateStats(){
   $('statDespachados').textContent = peds.filter(p=>p.estado==='despachado').length;
   $('statHot').textContent = convs.filter(c=>c.isHot && !c.hotAtendido).length;
 }
-// ===== MONTO DE VENTA (catálogo The Marketplace + promos 2x + Q30 envío único) =====
-const ENVIO_Q = 30;
+// ===== MONTO DE VENTA (catálogo CUCO Store — pago al recibir, envío por confirmar) =====
+const ENVIO_Q = 0;
 const PRECIOS_JM = [
-  { rx: /almohada|foamy|memory/i,               precio: 99,  promo2: 150 },
-  { rx: /coj[ií]n|gel/i,                        precio: 99,  promo2: 150 },
-  { rx: /soporte|magn[eé]tic/i,                 precio: 75,  promo2: 125 },
-  { rx: /masajeador.{0,25}silla/i,              precio: 275 },
-  { rx: /masajeador/i,                          precio: 225 },
-  { rx: /mesa\s+de\s+noche|smart|inteligente/i, precio: 999 },
-  { rx: /cesta|canasta/i,                       precio: 175 },
-  { rx: /mesa/i,                                precio: 199 },
-  { rx: /trapeador|mopa/i,                      precio: 125 },
-  { rx: /cepillo|cabezal/i,                     precio: 155 },
-  { rx: /zapatera|sill[oó]n/i,                  precio: 435 }
+  { rx: /soldador|soldar|mig|tig|\barc\b/i,                       precio: 855 },
+  { rx: /lavadora/i,                                              precio: 900 },
+  { rx: /hidro\s*aspiradora|hidroaspiradora|aspiradora/i,         precio: 675 }
 ];
 function montoPedido(productoText){
   const segs = String(productoText||'').split(/\s*(?:\+|,)\s*|\s+y\s+/i).filter(Boolean);
@@ -470,9 +462,7 @@ function montoPedido(productoText){
     const mQty = seg.match(/(?:^|[^0-9a-zA-Z])(\d{1,2})(?![0-9])/);
     let qty = mQty ? parseInt(mQty[1],10) : (/\bdos\b/i.test(seg) ? 2 : 1);
     if(!qty || qty < 1) qty = 1;
-    if(qty === 2 && item.promo2) subtotal += item.promo2;
-    else if(item.promo2 && qty > 2 && qty % 2 === 0) subtotal += (qty/2)*item.promo2;
-    else subtotal += item.precio * qty;
+    subtotal += item.precio * qty;
   }
   return reconocido ? subtotal + ENVIO_Q : null;
 }
@@ -597,7 +587,7 @@ function exportarExcel(){
   XLSX.utils.book_append_sheet(wb, ws, 'Pedidos');
   const desde = $('fDesde').value, hasta = $('fHasta').value;
   const sufijo = desde && hasta ? (desde===hasta ? desde : `${desde}_a_${hasta}`) : gtDateStr(Date.now());
-  XLSX.writeFile(wb, `pedidos-marketplace-jm${pCant>0?`-ultimos-${pCant}`:''}-${sufijo}.xlsx`);
+  XLSX.writeFile(wb, `pedidos-cuco-store${pCant>0?`-ultimos-${pCant}`:''}-${sufijo}.xlsx`);
 }
 
 function $(id){ return document.getElementById(id); }
@@ -765,7 +755,7 @@ async function exportarConversaciones(){
     ws2['!cols'] = [{wch:20},{wch:11},{wch:18},{wch:14},{wch:90}];
     XLSX.utils.book_append_sheet(wb, ws2, 'Mensajes');
     const sufijo = (hotOnly ? '-calientes' : '') + (cant > 0 ? `-ultimas-${cant}` : '');
-    XLSX.writeFile(wb, `conversaciones-marketplace-jm${sufijo}-${gtDateStr(Date.now())}.xlsx`);
+    XLSX.writeFile(wb, `conversaciones-cuco-store${sufijo}-${gtDateStr(Date.now())}.xlsx`);
   }catch(e){ console.error(e); alert('Error generando el Excel'); }
 }
 
@@ -926,18 +916,12 @@ function closeChat(){ $('chatModal').classList.remove('open'); const fs=document
 const GALERIA = [
   // 🖼️ GALERÍA DEL SITIO — medios que la asesora puede enviar con un clic desde el chat.
   // Solo URLs alojadas en ESTE sitio de Netlify (panel-send lo valida).
-  { nombre: '🪵 Mesa Portátil (laptop)',   url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa/mesa-madera-laptop.jpg', kind: 'image', caption: 'Mesa Portátil Ajustable — Q199 + Q30 de envío 🧡' },
-  { nombre: '🪵 Mesa Portátil (colores)',  url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa/mesa-colores.jpg', kind: 'image', caption: 'Disponible en rosado, beige, blanco y negro' },
-  { nombre: '🪵 Mesa Portátil (real)',     url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa/mesa-real-angulo.jpg', kind: 'image', caption: 'Foto real de la Mesa Portátil' },
-  { nombre: '😴 Almohada Foamy',           url: 'https://luminous-zuccutto-8f822b.netlify.app/img/almohada/almohada-1.jpg', kind: 'image', caption: 'Almohada memory foam — Q99 · 2 por Q150' },
-  { nombre: '🪑 Cojín de Gel',             url: 'https://luminous-zuccutto-8f822b.netlify.app/img/cojin-gel/cojin-gel-1.jpg', kind: 'image', caption: 'Cojín de Gel ortopédico — Q99 · 2 por Q150' },
-  { nombre: '💆 Masajeador de Manos',      url: 'https://luminous-zuccutto-8f822b.netlify.app/img/masajeador-manos/masajeador-manos-1.jpg', kind: 'image', caption: 'Masajeador de Manos recargable — Q225 + Q30 de envío' },
-  { nombre: '🧺 Mesa con Cesta',           url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa-cesta/mesa-cesta-1.jpg', kind: 'image', caption: 'Mesa con Cesta — Q175 + Q30 de envío (blanco o negro)' },
-  { nombre: '📱 Soporte Magnético',        url: 'https://luminous-zuccutto-8f822b.netlify.app/img/soporte/soporte-1.jpg', kind: 'image', caption: 'Soporte Magnético — Q75 · 2 por Q125' },
-  { nombre: '🧹 Trapeador Giratorio',      url: 'https://luminous-zuccutto-8f822b.netlify.app/img/trapeador/trapeador-1.jpg', kind: 'image', caption: 'Trapeador Giratorio — Q125 + Q30 de envío' },
-  { nombre: '🧽 Cepillo Eléctrico',        url: 'https://luminous-zuccutto-8f822b.netlify.app/img/cepillo/cepillo-1.jpg', kind: 'image', caption: 'Cepillo Eléctrico 9 en 1 — Q155 + Q30 de envío' },
-  { nombre: '👞 Zapatera Sillón',          url: 'https://luminous-zuccutto-8f822b.netlify.app/img/zapatera/zapatera-1.jpg', kind: 'image', caption: 'Zapatera Sillón de madera — Q435 + Q30 de envío' },
-  { nombre: '🛏️ Mesa de Noche Smart',      url: 'https://luminous-zuccutto-8f822b.netlify.app/img/mesa-noche/mesa-noche-1.jpg', kind: 'image', caption: 'Mesa de Noche Inteligente — Q999 + Q30 de envío' },
+  { nombre: '🔧 Soldadora (flyer con precio)', url: 'https://cerebrobot2.netlify.app/img/soldadora/soldadora-flyer.jpg', kind: 'image', caption: 'Máquina Soldadora Industrial 3 en 1 — Q855, pagas al recibir 💜' },
+  { nombre: '🔧 Soldadora (foto real)',        url: 'https://cerebrobot2.netlify.app/img/soldadora/soldadora-2.jpg', kind: 'image', caption: 'Foto real de la soldadora — incluye careta, guantes y alambre' },
+  { nombre: '🧺 Lavadora (flyer con precio)',  url: 'https://cerebrobot2.netlify.app/img/lavadora/lavadora-flyer.jpg', kind: 'image', caption: 'Lavadora Mediana 25 lb — Q900 en liquidación, pagas al recibir 💜' },
+  { nombre: '🧺 Lavadora (foto real)',         url: 'https://cerebrobot2.netlify.app/img/lavadora/lavadora-2.jpg', kind: 'image', caption: 'Foto real de la lavadora — lava y exprime' },
+  { nombre: '🛋️ Hidroaspiradora (flyer)',      url: 'https://cerebrobot2.netlify.app/img/hidroaspiradora/hidroaspiradora-flyer.jpg', kind: 'image', caption: 'Hidroaspiradora Portátil — Q675 en oferta (antes Q1,200) 💜' },
+  { nombre: '🛋️ Hidroaspiradora (foto real)',  url: 'https://cerebrobot2.netlify.app/img/hidroaspiradora/hidroaspiradora-2.jpg', kind: 'image', caption: 'Foto real de la hidroaspiradora — tapicería, colchones y alfombras' },
 ];
 
 function burbujaAsesoraLocal(texto){
