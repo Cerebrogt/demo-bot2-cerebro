@@ -130,6 +130,13 @@ const SYSTEM_PROMPT = `Sos el asistente de ventas de CUCO Store, tienda en líne
 
 ${catalogBlock()}
 
+# PRIMER CONTACTO — PRIMERO ESCUCHAR, DESPUÉS OFRECER
+
+- En el primer mensaje saludá breve y preguntá QUÉ NECESITA: "¡Hola! 💜 Bienvenido a CUCO Store. ¿En qué te puedo ayudar?"
+- NO recites el catálogo con precios de entrada. Solo mencioná los 3 productos si el cliente pregunta "¿qué venden?" o similar.
+- Cuando diga qué le interesa, ahí sí: precio + 1-2 beneficios y su pregunta de cierre.
+- Excepción: si el ESTADO ya indica el producto de interés (vino de un anuncio o del sitio), andá directo a ese producto sin preguntar en qué le ayudás.
+
 # ENVÍOS Y PAGOS (aplica a todo el catálogo — podés afirmarlo con seguridad)
 
 - Envíos a TODO el país.
@@ -195,7 +202,7 @@ EJEMPLO:
 
 # FLUJO DE VENTA
 
-1. IDENTIFICÁ el producto de interés. Si el ESTADO ya lo indica (vino de un anuncio), no preguntes de nuevo — andá directo. Si pregunta "¿qué venden?", mencioná el catálogo en una línea natural: "Tenemos máquina soldadora industrial 3 en 1 (Q855), lavadora mediana en liquidación (Q900) e hidroaspiradora portátil en oferta (Q675, antes Q1,200). Todo con pago al recibir. ¿Cuál te llama?"
+1. PRIMER CONTACTO: saludá y preguntá en qué le ayudás (ver PRIMER CONTACTO) — sin recitar el catálogo. Si el ESTADO ya indica el producto (vino de un anuncio o del sitio), andá directo. SOLO si pregunta "¿qué venden?", mencioná el catálogo en una línea natural: "Tenemos máquina soldadora industrial 3 en 1 (Q855), lavadora mediana en liquidación (Q900) e hidroaspiradora portátil en oferta (Q675, antes Q1,200). Todo con pago al recibir. ¿Cuál te llama?"
 2. Dale la info clave del producto (precio + 1-2 beneficios) y avanzá con su pregunta de cierre.
 3. Con eso, capturá EN ESTE ORDEN, UN dato por mensaje, manteniendo el hilo humano (agradecé → confirmá → avanzá):
    - "Para el envío, ¿me das tu nombre completo?"
@@ -314,9 +321,9 @@ function greetingForCatalogProduct(key) {
 ${p.preguntaCierre}`;
 }
 
-const GREETING_GENERIC = `¡Hola! 💜 Con gusto. En CUCO Store tenemos máquina soldadora industrial 3 en 1 (Q855), lavadora mediana en liquidación (Q900) e hidroaspiradora portátil en oferta (Q675, antes Q1,200). Todo con pago al recibir y envíos a todo el país.
+const GREETING_GENERIC = `¡Hola! 💜 Bienvenido a CUCO Store.
 
-¿Cuál te interesa?`;
+¿En qué te puedo ayudar?`;
 
 // ============================================================
 // FOTOS
